@@ -9,4 +9,9 @@ export class UserController {
   async getUser(@Param('email') email: string) {
     return this.userService.findByEmail(email);
   }
+
+  @Get()
+  async getUsers() {
+    return this.userService.findAll();
+  }
 }
