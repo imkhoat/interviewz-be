@@ -5,6 +5,7 @@ import { UserModule } from './modules/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
+import { ResumeModule } from './modules/resume/resume.module';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { AuthModule } from './modules/auth/auth.module';
       database: process.env.DB_NAME || 'mydb',
       autoLoadEntities: true, // 👈 Tự động load entity, tránh lỗi import thiếu
       synchronize: true,
-    }),
+    }), ResumeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
