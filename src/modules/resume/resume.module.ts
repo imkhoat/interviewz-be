@@ -4,6 +4,6 @@ import { ResumeController } from './resume.controller';
 
 @Module({
   providers: [ResumeService],
-  controllers: [ResumeController]
+  controllers: [ResumeController],
 })
 export class ResumeModule {}
