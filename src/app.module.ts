@@ -21,7 +21,8 @@ import { ResumeModule } from './modules/resume/resume.module';
       database: process.env.DB_NAME || 'mydb',
       autoLoadEntities: true, // 👈 Tự động load entity, tránh lỗi import thiếu
       synchronize: true,
-    }), ResumeModule,
+    }),
+    ResumeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
