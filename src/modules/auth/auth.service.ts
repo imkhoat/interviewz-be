@@ -48,7 +48,7 @@ export class AuthService {
     return this.userService.updateRefreshToken(userId, null);
   }
 
-  async register(payload: CreateUserDto) {
+  async signup(payload: CreateUserDto) {
     return this.userService.createUser(payload);
   }
 }

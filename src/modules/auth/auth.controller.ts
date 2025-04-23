@@ -28,9 +28,9 @@ export class AuthController {
     return this.authService.logout(req.user.id);
   }
 
-  @Post('register')
-  async register(@Body() body: CreateUserDto) {
+  @Post('signup')
+  async signup(@Body() body: CreateUserDto) {
     console.log(body);
-    return this.authService.register(body);
+    return this.authService.signup(body);
   }
 }
