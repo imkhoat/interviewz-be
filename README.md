@@ -21,67 +21,186 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# InterviewZ Backend
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Backend service for InterviewZ application built with NestJS.
 
-## Project setup
+## Prerequisites
 
-```bash
-$ npm install
-```
+- Node.js (v18 or later)
+- Docker and Docker Compose
+- Git
 
-## Compile and run the project
+## Getting Started
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+### 1. Clone the repository
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone https://github.com/your-username/interviewz-be.git
+cd interviewz-be
 ```
+
+### 2. Environment Setup
+
+Copy the example environment file and update the values:
+
+```bash
+cp .env.example .env
+```
+
+Update the following variables in `.env` file:
+
+```env
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=admin
+DB_PASS=admin
+DB_NAME=interviewz
+
+# JWT Configuration
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=1h
+JWT_REFRESH_SECRET=your_refresh_secret
+JWT_REFRESH_EXPIRES_IN=7d
+
+# Frontend URL for CORS
+FRONTEND_URL=http://localhost:4000
+```
+
+### 3. Running with Docker (Recommended)
+
+The easiest way to run the application is using Docker Compose:
+
+```bash
+# Build and start the containers
+docker-compose up --build
+
+# To run in detached mode
+docker-compose up -d
+
+# To stop the containers
+docker-compose down
+```
+
+This will start:
+- NestJS application on http://localhost:3000
+- PostgreSQL database on port 5432
+
+### 4. Running without Docker
+
+If you prefer to run the application without Docker:
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Start PostgreSQL database:
+```bash
+# Using Docker for database only
+docker-compose up db
+```
+
+3. Run the application:
+```bash
+# Development mode
+npm run start:dev
+
+# Production mode
+npm run build
+npm run start:prod
+```
+
+## Development
+
+### Available Scripts
+
+- `npm run start:dev` - Start the application in development mode with hot-reload
+- `npm run build` - Build the application
+- `npm run start:prod` - Start the application in production mode
+- `npm run lint` - Run ESLint
+- `npm run test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:cov` - Run tests with coverage
+
+### Project Structure
+
+```
+src/
+├── config/           # Configuration files
+├── modules/          # Feature modules
+│   ├── auth/        # Authentication module
+│   ├── user/        # User module
+│   └── resume/      # Resume module
+├── shared/          # Shared utilities and components
+└── main.ts          # Application entry point
+```
+
+### API Documentation
+
+Once the application is running, you can access the API documentation at:
+- Swagger UI: http://localhost:3000/api
+- OpenAPI JSON: http://localhost:3000/api-json
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:cov
+```
+
+### Test Database
+
+The application uses a separate database for testing. The test database configuration is handled automatically by the test setup.
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+The application is configured for deployment on AWS ECS using GitHub Actions. The deployment process is automated through CI/CD pipeline.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Deployment Environments
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+- Development: `develop` branch
+- Staging: `staging` branch
+- Production: `main` branch
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Required Secrets for Deployment
 
-## Resources
+The following secrets need to be configured in GitHub:
 
-Check out a few resources that may come in handy when working with NestJS:
+- `DB_USER` - Database username
+- `DB_PASS` - Database password
+- `DB_NAME` - Database name
+- `JWT_SECRET` - JWT secret key
+- `JWT_EXPIRES_IN` - JWT expiration time
+- `JWT_REFRESH_SECRET` - JWT refresh secret key
+- `JWT_REFRESH_EXPIRES_IN` - JWT refresh expiration time
+- `AWS_ACCESS_KEY_ID` - AWS access key
+- `AWS_SECRET_ACCESS_KEY` - AWS secret key
+- `AWS_REGION` - AWS region
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Contributing
+
+1. Create a new branch for your feature
+2. Make your changes
+3. Run tests
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
 
 ## Support
 
