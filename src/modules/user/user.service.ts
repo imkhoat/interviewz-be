@@ -17,10 +17,10 @@ export class UserService {
   }
 
   async createUser(payload: CreateUserDto): Promise<UserResponseDto> {
-    console.log('createUser', payload);
     const user = this.userRepository.create(payload);
     await this.userRepository.save(user);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, refreshToken, ...userResponse } = user;
     return userResponse;
   }
