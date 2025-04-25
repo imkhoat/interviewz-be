@@ -4,6 +4,8 @@ import { JwtAuthGuard } from './auth.guard';
 import { RefreshTokenGuard } from './refresh.guard';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 // @UseGuards(JwtAuthGuard, RoleGuard)
@@ -11,7 +13,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() body: { email: string; password: string }): Promise<LoginResponseDto> {
+  async login(
+    @Body() body: { email: string; password: string },
+  ): Promise<LoginResponseDto> {
     return this.authService.login(body.email, body.password);
   }
 
@@ -30,5 +34,15 @@ export class AuthController {
   @Post('signup')
   async signup(@Body() body: CreateUserDto) {
     return this.authService.signup(body);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 }

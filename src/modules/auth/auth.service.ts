@@ -1,19 +1,126 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, MoreThan } from 'typeorm';
+import { User } from '../user/user.entity';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import * as bcrypt from 'bcrypt';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private jwtService: JwtService,
+    private mailerService: MailerService,
+    private configService: ConfigService,
   ) {}
 
+  async register(registerDto: RegisterDto) {
+    const { email, password } = registerDto;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = this.userRepository.create({
+      email,
+      password: hashedPassword,
+    });
+
+    await this.userRepository.save(user);
+    return this.generateTokens(user);
+  }
+
+  async login(email: string, password: string): Promise<LoginResponseDto> {
+    const userInfo = await this.validateUser(email, password);
+    const user = await this.userRepository.findOne({ where: { id: userInfo.id } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    const tokens = await this.generateTokens(user);
+    return {
+      user: userInfo,
+      tokens,
+    };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { tempPassword, newPassword } = resetPasswordDto;
+
+    // Find user with valid temporary password
+    const users = await this.userRepository.find({
+      where: {
+        tempPasswordExpires: MoreThan(new Date()),
+      },
+    });
+
+    const user = await Promise.all(
+      users.map(async (u) => {
+        const isValid = await bcrypt.compare(tempPassword, u.tempPassword || '');
+        return isValid ? u : null;
+      })
+    ).then((results) => results.find((u) => u !== null));
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired temporary password');
+    }
+
+    // Update password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.tempPassword = '';
+    user.tempPasswordExpires = new Date();
+    await this.userRepository.save(user);
+
+    return { message: 'Password has been reset successfully' };
+  }
+
+  async changePassword(userId: number, currentPassword: string, newPassword: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid current password');
+    }
+
+    // Update password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await this.userRepository.save(user);
+
+    return { message: 'Password changed successfully' };
+  }
+
+  private async generateTokens(user: User) {
+    const payload = { sub: user.id, email: user.email, role: user.role };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN'),
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
+    });
+
+    await this.userRepository.update(user.id, { refreshToken });
+    return { accessToken, refreshToken };
+  }
+
   async validateUser(email: string, password: string) {
-    const user = await this.userService.findByEmail(email);
+    const user = await this.userRepository.findOne({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
       const { password: _, refreshToken: __, ...userInfo } = user;
       return userInfo;
@@ -21,34 +128,8 @@ export class AuthService {
     throw new UnauthorizedException('Invalid credentials');
   }
 
-  async generateTokens(user: any) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
-
-    const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
-
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
-    });
-
-    await this.userService.updateRefreshToken(user.id, refreshToken);
-    return { accessToken, refreshToken };
-  }
-
-  async login(email: string, password: string): Promise<LoginResponseDto> {
-    const user = await this.validateUser(email, password);
-    const tokens = await this.generateTokens(user);
-    return {
-      user,
-      tokens,
-    };
-  }
-
   async refreshToken(userId: number, refreshToken: string) {
-    const user = await this.userService.findById(userId);
+    const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user || user.refreshToken !== refreshToken) {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -61,10 +142,43 @@ export class AuthService {
   }
 
   async logout(userId: number) {
-    return this.userService.updateRefreshToken(userId, null);
+    await this.userRepository.update(userId, { refreshToken: '' });
   }
 
   async signup(payload: CreateUserDto) {
-    return this.userService.createUser(payload);
+    const user = this.userRepository.create(payload);
+    await this.userRepository.save(user);
+    return this.generateTokens(user);
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const { email } = forgotPasswordDto;
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Generate temporary password
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
+
+    // Save temporary password and set expiration (1 hour)
+    user.tempPassword = hashedTempPassword;
+    user.tempPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
+    await this.userRepository.save(user);
+
+    // Send email with temporary password
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Password Reset Request',
+      template: 'reset-password',
+      context: {
+        tempPassword,
+        expiresIn: '1 hour',
+      },
+    });
+
+    return { message: 'Temporary password has been sent to your email' };
   }
 }

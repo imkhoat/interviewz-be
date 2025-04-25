@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeInsert,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 export enum UserRole {
@@ -28,6 +35,12 @@ export class User {
   refreshToken: string;
 
   @Column({ nullable: true })
+  tempPassword: string;
+
+  @Column({ nullable: true })
+  tempPasswordExpires: Date;
+
+  @Column({ nullable: true })
   firstName: string;
 
   @Column({ nullable: true })
@@ -41,6 +54,9 @@ export class User {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
-  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
