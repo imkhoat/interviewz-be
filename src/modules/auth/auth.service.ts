@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
@@ -13,6 +18,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +45,9 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<LoginResponseDto> {
     const userInfo = await this.validateUser(email, password);
-    const user = await this.userRepository.findOne({ where: { id: userInfo.id } });
+    const user = await this.userRepository.findOne({
+      where: { id: userInfo.id },
+    });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -62,9 +70,12 @@ export class AuthService {
 
     const user = await Promise.all(
       users.map(async (u) => {
-        const isValid = await bcrypt.compare(tempPassword, u.tempPassword || '');
+        const isValid = await bcrypt.compare(
+          tempPassword,
+          u.tempPassword || '',
+        );
         return isValid ? u : null;
-      })
+      }),
     ).then((results) => results.find((u) => u !== null));
 
     if (!user) {
@@ -81,7 +92,11 @@ export class AuthService {
     return { message: 'Password has been reset successfully' };
   }
 
-  async changePassword(userId: number, currentPassword: string, newPassword: string) {
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
@@ -89,7 +104,10 @@ export class AuthService {
     }
 
     // Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid current password');
     }
@@ -156,7 +174,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // Generate temporary password
@@ -164,21 +182,35 @@ export class AuthService {
     const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
 
     // Save temporary password and set expiration (1 hour)
-    user.tempPassword = hashedTempPassword;
-    user.tempPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
-    await this.userRepository.save(user);
-
-    // Send email with temporary password
-    await this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Password Reset Request',
-      template: 'reset-password',
-      context: {
-        tempPassword,
-        expiresIn: '1 hour',
-      },
+    await this.userRepository.update(user.id, {
+      tempPassword: hashedTempPassword,
+      tempPasswordExpires: new Date(Date.now() + 3600000), // 1 hour
     });
 
-    return { message: 'Temporary password has been sent to your email' };
+    const mailOptions = {
+      to: user.email,
+      subject: 'Password Reset Request',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Password Reset Request</h2>
+          <p>Hello ${user.fullName},</p>
+          <p>We received a request to reset your password. If you didn't make this request, you can safely ignore this email.</p>
+          <p>Here is your temporary password:</p>
+          <div style="text-align: center; margin: 20px 0;">
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 18px;">
+              ${tempPassword}
+            </div>
+          </div>
+          <p>This temporary password will expire in 1 hour.</p>
+          <p>Please use this temporary password to reset your password. After logging in, you should change your password immediately.</p>
+          <p>If you have any questions, please contact our support team.</p>
+          <p>Best regards,<br>InterviewZ Team</p>
+        </div>
+      `,
+    };
+
+    await this.mailerService.sendMail(mailOptions);
+
+    return { message: 'Password reset email sent' };
   }
 }
