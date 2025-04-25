@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../user/dto/create-user.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,8 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.userService.findByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
-      return { id: user.id, email: user.email, role: user.role };
+      const { password: _, refreshToken: __, ...userInfo } = user;
+      return userInfo;
     }
     throw new UnauthorizedException('Invalid credentials');
   }
@@ -36,12 +38,26 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  async login(email: string, password: string): Promise<LoginResponseDto> {
+    const user = await this.validateUser(email, password);
+    const tokens = await this.generateTokens(user);
+    return {
+      user,
+      tokens,
+    };
+  }
+
   async refreshToken(userId: number, refreshToken: string) {
     const user = await this.userService.findById(userId);
     if (!user || user.refreshToken !== refreshToken) {
       throw new UnauthorizedException('Invalid refresh token');
     }
-    return this.generateTokens(user);
+    const { password: _, refreshToken: __, ...userInfo } = user;
+    const tokens = await this.generateTokens(user);
+    return {
+      user: userInfo,
+      tokens,
+    };
   }
 
   async logout(userId: number) {
