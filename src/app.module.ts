@@ -9,9 +9,7 @@ import { ResumeModule } from './modules/resume/resume.module';
 
 @Module({
   imports: [
-    UserModule, // 👈 Đảm bảo UserModule đã được import
-    AuthModule,
-    ConfigModule.forRoot(), // 👈 Load biến môi trường từ .env
+    ConfigModule.forRoot(), // 👈 Load biến môi trường từ .env trước
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST || 'localhost',
@@ -22,6 +20,8 @@ import { ResumeModule } from './modules/resume/resume.module';
       autoLoadEntities: true, // 👈 Tự động load entity, tránh lỗi import thiếu
       synchronize: true,
     }),
+    UserModule,
+    AuthModule,
     ResumeModule,
   ],
   controllers: [AppController],
