@@ -2,9 +2,9 @@ import { IsString, MinLength } from 'class-validator';
 
 export class ChangePasswordDto {
   @IsString()
-  currentPassword: string;
+  password: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(6, { message: 'New password must be at least 6 characters long' })
   newPassword: string;
 }
