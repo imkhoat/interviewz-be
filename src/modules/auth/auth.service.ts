@@ -123,7 +123,7 @@ export class AuthService {
   }
 
   private async generateTokens(user: User) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { sub: user.id, email: user.email, role: user.userRole };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
@@ -143,7 +143,10 @@ export class AuthService {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
       const { password: _, refreshToken: __, ...userInfo } = user;
-      return userInfo;
+      return {
+        ...userInfo,
+        fullName: user.fullName,
+      };
     }
     throw new UnauthorizedException('Invalid credentials');
   }
@@ -156,7 +159,10 @@ export class AuthService {
     const { password: _, refreshToken: __, ...userInfo } = user;
     const tokens = await this.generateTokens(user);
     return {
-      user: userInfo,
+      user: {
+        ...userInfo,
+        fullName: user.fullName,
+      },
       tokens,
     };
   }

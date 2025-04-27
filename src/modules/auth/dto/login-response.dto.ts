@@ -3,12 +3,15 @@ import { UserRole } from '../../user/user.entity';
 export class LoginResponseDto {
   user: {
     id: number;
+    username: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    firstName?: string;
+    lastName?: string;
     fullName: string;
-    role: UserRole;
+    userRole: UserRole;
+    isActive: boolean;
     createdAt: Date;
+    updatedAt: Date;
   };
   tokens: {
     accessToken: string;

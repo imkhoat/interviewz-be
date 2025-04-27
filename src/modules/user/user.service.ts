@@ -21,8 +21,11 @@ export class UserService {
     await this.userRepository.save(user);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, refreshToken, ...userResponse } = user;
-    return userResponse;
+    const { password, refreshToken, resetPasswordToken, resetPasswordExpires, mainRoleId, ...userResponse } = user;
+    return {
+      ...userResponse,
+      fullName: user.fullName,
+    };
   }
 
   async findById(id: number): Promise<User | null> {

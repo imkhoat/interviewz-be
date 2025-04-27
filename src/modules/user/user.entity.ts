@@ -2,26 +2,35 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  ManyToOne,
+  JoinColumn,
+  ManyToMany,
+  JoinTable,
   BeforeInsert,
-  CreateDateColumn,
-  UpdateDateColumn,
+  BeforeUpdate,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
+import { Role } from '../role/entities/role.entity';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
   USER = 'USER',
 }
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ length: 50, unique: true })
+  username: string;
+
+  @Column({ length: 100, unique: true })
   email: string;
 
-  @Column()
+  @Column({ length: 100 })
+  @Exclude()
   password: string;
 
   @Column({
@@ -29,7 +38,7 @@ export class User {
     enum: UserRole,
     default: UserRole.USER,
   })
-  role: UserRole;
+  userRole: UserRole;
 
   @Column({ nullable: true })
   refreshToken: string;
@@ -40,23 +49,66 @@ export class User {
   @Column({ nullable: true })
   resetPasswordExpires: Date;
 
-  @Column({ nullable: true })
-  firstName: string;
+  @Column({ length: 50, nullable: true })
+  firstName?: string;
+
+  @Column({ length: 50, nullable: true })
+  lastName?: string;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @Column({ nullable: true })
-  lastName: string;
+  mainRoleId?: number;
 
-  @Column({ nullable: true })
-  fullName: string;
+  @ManyToOne(() => Role, (role) => role.users)
+  @JoinColumn({ name: 'mainRoleId' })
+  mainRole?: Role;
 
-  @BeforeInsert()
-  async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
+  @ManyToMany(() => Role, (role) => role.additionalUsers)
+  @JoinTable({
+    name: 'user_additional_roles',
+    joinColumn: { name: 'userId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'roleId', referencedColumnName: 'id' },
+  })
+  additionalRoles?: Role[];
 
-  @CreateDateColumn()
+  @Column({ type: 'timestamp', nullable: true })
+  lastLoginAt?: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @Column({ 
+    type: 'timestamp', 
+    default: () => 'CURRENT_TIMESTAMP', 
+    onUpdate: 'CURRENT_TIMESTAMP' 
+  })
   updatedAt: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    if (this.password) {
+      try {
+        const salt = await bcrypt.genSalt();
+        this.password = await bcrypt.hash(this.password, salt);
+      } catch (error) {
+        console.error('Error hashing password:', error);
+      }
+    }
+  }
+
+  async validatePassword(password: string): Promise<boolean> {
+    try {
+      return await bcrypt.compare(password, this.password);
+    } catch (error) {
+      console.error('Error validating password:', error);
+      return false;
+    }
+  }
+
+  get fullName(): string {
+    return `${this.firstName || ''} ${this.lastName || ''}`.trim();
+  }
 }
