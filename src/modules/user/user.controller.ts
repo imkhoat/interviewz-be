@@ -1,7 +1,18 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
+import { JwtAuthGuard } from '../auth/auth.guard';
+import { RoleGuard } from '../auth/role.guard';
+import { Roles } from '../auth/role.decorator';
+import { UserRole } from './user.entity';
 
-@Controller('user')
+@Controller('users')
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -16,6 +27,7 @@ export class UserController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN)
   async getUsers() {
     return this.userService.findAll();
   }
