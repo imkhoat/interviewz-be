@@ -6,6 +6,8 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { GetUser } from './decorators/get-user.decorator';
 
 @Controller('auth')
 // @UseGuards(JwtAuthGuard, RoleGuard)
@@ -44,5 +46,15 @@ export class AuthController {
   @Post('reset-password')
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @GetUser('id') userId: number,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.changePassword(userId, changePasswordDto);
+    return { message: 'Password changed successfully' };
   }
 }
