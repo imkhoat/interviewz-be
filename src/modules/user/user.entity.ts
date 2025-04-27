@@ -35,10 +35,10 @@ export class User {
   refreshToken: string;
 
   @Column({ nullable: true })
-  tempPassword: string;
+  resetPasswordToken: string;
 
   @Column({ nullable: true })
-  tempPasswordExpires: Date;
+  resetPasswordExpires: Date;
 
   @Column({ nullable: true })
   firstName: string;

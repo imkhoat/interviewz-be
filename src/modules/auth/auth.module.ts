@@ -9,6 +9,8 @@ import { UserModule } from '../user/user.module';
 import { User } from '../user/user.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { join } from 'path';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -38,6 +40,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
         defaults: {
           from: configService.get<string>('MAIL_FROM'),
+        },
+        template: {
+          dir: join(__dirname, '..', '..', 'templates'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+        options: {
+          strict: true,
         },
       }),
       inject: [ConfigService],

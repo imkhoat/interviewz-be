@@ -8,10 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
 import { User } from '../user/user.entity';
-import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -59,65 +57,45 @@ export class AuthService {
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const { tempPassword, newPassword } = resetPasswordDto;
+    const { token, newPassword } = resetPasswordDto;
+    console.log('Received token:', token);
 
-    // Find user with valid temporary password
+    // Find user with valid reset token
     const users = await this.userRepository.find({
       where: {
-        tempPasswordExpires: MoreThan(new Date()),
+        resetPasswordExpires: MoreThan(new Date()),
       },
     });
+    console.log('Found users with valid expiration:', users.length);
 
     const user = await Promise.all(
       users.map(async (u) => {
-        const isValid = await bcrypt.compare(
-          tempPassword,
-          u.tempPassword || '',
-        );
+        if (!u.resetPasswordToken) {
+          console.log('User has no reset token:', u.id);
+          return null;
+        }
+        const isValid = await bcrypt.compare(token, u.resetPasswordToken);
+        console.log('Token validation for user', u.id, ':', isValid);
         return isValid ? u : null;
       }),
     ).then((results) => results.find((u) => u !== null));
 
     if (!user) {
-      throw new BadRequestException('Invalid or expired temporary password');
+      console.log('No valid user found with the provided token');
+      throw new BadRequestException('Invalid or expired reset token');
     }
+
+    console.log('Found valid user:', user.id);
 
     // Update password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    user.tempPassword = '';
-    user.tempPasswordExpires = new Date();
-    await this.userRepository.save(user);
+    await this.userRepository.update(user.id, {
+      password: hashedPassword,
+      resetPasswordToken: '',
+      resetPasswordExpires: new Date(),
+    });
 
     return { message: 'Password has been reset successfully' };
-  }
-
-  async changePassword(
-    userId: number,
-    currentPassword: string,
-    newPassword: string,
-  ) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
-    // Verify current password
-    const isPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.password,
-    );
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid current password');
-    }
-
-    // Update password
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedNewPassword;
-    await this.userRepository.save(user);
-
-    return { message: 'Password changed successfully' };
   }
 
   private async generateTokens(user: User) {
@@ -159,10 +137,6 @@ export class AuthService {
     };
   }
 
-  async logout(userId: number) {
-    await this.userRepository.update(userId, { refreshToken: '' });
-  }
-
   async signup(payload: CreateUserDto) {
     const user = this.userRepository.create(payload);
     await this.userRepository.save(user);
@@ -177,40 +151,36 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    // Generate temporary password
-    const tempPassword = Math.random().toString(36).slice(-8);
-    const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
+    // Generate reset password token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = await bcrypt.hash(resetToken, 10);
 
-    // Save temporary password and set expiration (1 hour)
+    // Save token and set expiration (1 hour)
     await this.userRepository.update(user.id, {
-      tempPassword: hashedTempPassword,
-      tempPasswordExpires: new Date(Date.now() + 3600000), // 1 hour
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: new Date(Date.now() + 3600000), // 1 hour
     });
+
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const resetUrl = `${frontendUrl}/auth/reset-password?token=${resetToken}`;
 
     const mailOptions = {
       to: user.email,
       subject: 'Password Reset Request',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">Password Reset Request</h2>
-          <p>Hello ${user.fullName},</p>
-          <p>We received a request to reset your password. If you didn't make this request, you can safely ignore this email.</p>
-          <p>Here is your temporary password:</p>
-          <div style="text-align: center; margin: 20px 0;">
-            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 18px;">
-              ${tempPassword}
-            </div>
-          </div>
-          <p>This temporary password will expire in 1 hour.</p>
-          <p>Please use this temporary password to reset your password. After logging in, you should change your password immediately.</p>
-          <p>If you have any questions, please contact our support team.</p>
-          <p>Best regards,<br>InterviewZ Team</p>
-        </div>
-      `,
+      template: 'reset-password',
+      context: {
+        fullName: user.fullName || 'there',
+        resetUrl,
+      },
     };
 
     await this.mailerService.sendMail(mailOptions);
 
     return { message: 'Password reset email sent' };
+  }
+
+  async logout(userId: number) {
+    await this.userRepository.update(userId, { refreshToken: '' });
+    return { message: 'Logged out successfully' };
   }
 }
