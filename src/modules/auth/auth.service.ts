@@ -43,16 +43,31 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<LoginResponseDto> {
-    const userInfo = await this.validateUser(email, password);
-    const user = await this.userRepository.findOne({
-      where: { id: userInfo.id },
-    });
+    const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('Invalid credentials');
     }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
     const tokens = await this.generateTokens(user);
+    await this.userRepository.update(user.id, { refreshToken: tokens.refreshToken });
+
     return {
-      user: userInfo,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: user.fullName,
+        userRole: user.userRole,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
       tokens,
     };
   }
@@ -160,17 +175,61 @@ export class AuthService {
     const tokens = await this.generateTokens(user);
     return {
       user: {
-        ...userInfo,
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
         fullName: user.fullName,
+        userRole: user.userRole,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       },
       tokens,
     };
   }
 
   async signup(payload: CreateUserDto) {
-    const user = this.userRepository.create(payload);
+    const { email } = payload;
+
+    // Check if user already exists
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('User already exists');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(payload.password, 10);
+
+    // Create new user
+    const user = this.userRepository.create({
+      ...payload,
+      password: hashedPassword,
+    });
+
     await this.userRepository.save(user);
-    return this.generateTokens(user);
+
+    // Generate tokens
+    const tokens = await this.generateTokens(user);
+    await this.userRepository.update(user.id, { refreshToken: tokens.refreshToken });
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: user.fullName,
+        userRole: user.userRole,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+      tokens,
+    };
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
