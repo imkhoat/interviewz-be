@@ -26,4 +26,4 @@ export class CreatePolicyDto {
   @IsArray()
   @IsOptional()
   roleIds?: number[];
-} 
+}

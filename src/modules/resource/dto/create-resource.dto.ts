@@ -13,4 +13,4 @@ export class CreateResourceDto {
   @IsString()
   @IsOptional()
   description?: string;
-} 
+}

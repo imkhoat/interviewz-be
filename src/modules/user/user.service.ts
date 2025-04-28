@@ -20,8 +20,14 @@ export class UserService {
     const user = this.userRepository.create(payload);
     await this.userRepository.save(user);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, refreshToken, resetPasswordToken, resetPasswordExpires, mainRoleId, ...userResponse } = user;
+    const {
+      password,
+      refreshToken,
+      resetPasswordToken,
+      resetPasswordExpires,
+      mainRoleId,
+      ...userResponse
+    } = user;
     return {
       ...userResponse,
       fullName: user.fullName,

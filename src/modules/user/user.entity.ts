@@ -10,7 +10,7 @@ import {
   BeforeUpdate,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 import { Role } from '../role/entities/role.entity';
 
 export enum UserRole {
@@ -76,10 +76,10 @@ export class User {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({ 
-    type: 'timestamp', 
-    default: () => 'CURRENT_TIMESTAMP', 
-    onUpdate: 'CURRENT_TIMESTAMP' 
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
 
@@ -88,8 +88,7 @@ export class User {
   async hashPassword() {
     if (this.password) {
       try {
-        const salt = await bcrypt.genSalt();
-        this.password = await bcrypt.hash(this.password, salt);
+        this.password = await argon2.hash(this.password);
       } catch (error) {
         console.error('Error hashing password:', error);
       }
@@ -98,7 +97,7 @@ export class User {
 
   async validatePassword(password: string): Promise<boolean> {
     try {
-      return await bcrypt.compare(password, this.password);
+      return await argon2.verify(this.password, password);
     } catch (error) {
       console.error('Error validating password:', error);
       return false;

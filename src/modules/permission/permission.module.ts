@@ -6,4 +6,4 @@ import { Permission } from './entities/permission.entity';
   imports: [TypeOrmModule.forFeature([Permission])],
   exports: [TypeOrmModule],
 })
-export class PermissionModule {} 
+export class PermissionModule {}

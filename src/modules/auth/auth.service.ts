@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,13 +11,13 @@ import { Repository, MoreThan } from 'typeorm';
 import { User } from '../user/user.entity';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import * as crypto from 'crypto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +36,7 @@ export class AuthService {
     }
 
     try {
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await argon2.verify(user.password, password);
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
       }
@@ -121,7 +122,7 @@ export class AuthService {
           return null;
         }
         try {
-          const isValid = await bcrypt.compare(token, u.resetPasswordToken);
+          const isValid = await argon2.verify(u.resetPasswordToken, token);
           console.log('Token validation for user', u.id, ':', isValid);
           return isValid ? u : null;
         } catch (error) {
@@ -140,7 +141,7 @@ export class AuthService {
 
     try {
       // Update password
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const hashedPassword = await argon2.hash(newPassword);
       await this.userRepository.update(user.id, {
         password: hashedPassword,
         resetPasswordToken: '',
@@ -163,16 +164,16 @@ export class AuthService {
     }
 
     try {
-      const isPasswordValid = await bcrypt.compare(
-        changePasswordDto.password,
+      const isPasswordValid = await argon2.verify(
         user.password,
+        changePasswordDto.password,
       );
 
       if (!isPasswordValid) {
         throw new UnauthorizedException('Current password is incorrect');
       }
 
-      const hashedPassword = await bcrypt.hash(changePasswordDto.newPassword, 10);
+      const hashedPassword = await argon2.hash(changePasswordDto.newPassword);
       user.password = hashedPassword;
       await this.userRepository.save(user);
     } catch (error) {
@@ -204,7 +205,7 @@ export class AuthService {
     }
 
     try {
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await argon2.verify(user.password, password);
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
       }
@@ -254,7 +255,7 @@ export class AuthService {
     // Generate reset password token
     const resetToken = crypto.randomBytes(32).toString('hex');
     try {
-      const hashedToken = await bcrypt.hash(resetToken, 10);
+      const hashedToken = await argon2.hash(resetToken);
 
       // Save token and set expiration (1 hour)
       await this.userRepository.update(user.id, {

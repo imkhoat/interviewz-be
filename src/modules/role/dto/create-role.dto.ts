@@ -19,4 +19,4 @@ export class CreateRoleDto {
   @IsArray()
   @IsOptional()
   policyIds?: number[];
-} 
+}
