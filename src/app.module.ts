@@ -6,6 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { ResumeModule } from './modules/resume/resume.module';
+import { RoleModule } from './modules/role/role.module';
+import { PermissionModule } from './modules/permission/permission.module';
+import { MenuModule } from './modules/menu/menu.module';
+import { PolicyModule } from './modules/policy/policy.module';
 
 @Module({
   imports: [
@@ -23,6 +27,10 @@ import { ResumeModule } from './modules/resume/resume.module';
     UserModule,
     AuthModule,
     ResumeModule,
+    RoleModule,
+    PermissionModule,
+    MenuModule,
+    PolicyModule,
   ],
   controllers: [AppController],
   providers: [AppService],
