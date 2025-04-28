@@ -110,10 +110,13 @@ npm run start:prod
 ```
 src/
 ├── config/           # Configuration files
+│   └── typeorm.config.ts  # TypeORM configuration
 ├── modules/          # Feature modules
 │   ├── auth/        # Authentication module
 │   ├── user/        # User module
 │   └── resume/      # Resume module
+├── migrations/       # Database migrations
+│   └── *.ts         # Migration files
 ├── shared/          # Shared utilities and components
 ├── database/        # Database configuration and migrations
 ├── common/          # Common utilities and helpers
@@ -122,6 +125,64 @@ src/
 ├── app.service.ts   # Root application service
 └── main.ts          # Application entry point
 ```
+
+### Database Migrations
+
+The application uses TypeORM migrations to manage database schema changes. Here's how to work with migrations:
+
+#### Creating a New Migration
+
+1. Create a new migration file:
+```bash
+npm run migration:create src/migrations/YourMigrationName
+```
+
+This will create a new migration file with `up()` and `down()` methods.
+
+2. Implement the migration:
+```typescript
+import { MigrationInterface, QueryRunner } from "typeorm";
+
+export class YourMigrationName1234567890123 implements MigrationInterface {
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        // Add your migration logic here
+        // Example: await queryRunner.query(`ALTER TABLE "users" ADD COLUMN "newField" varchar`);
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+        // Add your rollback logic here
+        // Example: await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "newField"`);
+    }
+}
+```
+
+#### Generating Migrations
+
+To generate a migration based on entity changes:
+
+```bash
+npm run migration:generate src/migrations/YourMigrationName
+```
+
+This will compare your current database schema with your entity definitions and create a migration file with the necessary changes.
+
+#### Running Migrations
+
+To apply pending migrations:
+
+```bash
+npm run migration:run
+```
+
+#### Rolling Back Migrations
+
+To revert the last applied migration:
+
+```bash
+npm run migration:revert
+```
+
+**Note**: Always backup your database before running migrations in production.
 
 ### API Documentation
 
