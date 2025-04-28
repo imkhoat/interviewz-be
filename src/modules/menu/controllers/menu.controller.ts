@@ -50,4 +50,4 @@ export class MenuController {
   remove(@Param('id') id: string) {
     return this.menuService.remove(+id);
   }
-} 
+}

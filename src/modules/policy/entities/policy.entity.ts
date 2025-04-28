@@ -23,4 +23,4 @@ export class Policy {
 
   @ManyToMany(() => Role, (role) => role.policies)
   roles?: Role[];
-} 
+}

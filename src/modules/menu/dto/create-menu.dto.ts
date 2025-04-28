@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsNumber, IsArray, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  IsBoolean,
+} from 'class-validator';
 
 export class CreateMenuDto {
   @IsString()
@@ -34,4 +40,4 @@ export class CreateMenuDto {
   @IsString()
   @IsOptional()
   component?: string;
-} 
+}

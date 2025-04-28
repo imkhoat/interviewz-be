@@ -21,4 +21,4 @@ export class Permission {
 
   @ManyToMany(() => Menu, (menu) => menu.permissions)
   menus?: Menu[];
-} 
+}

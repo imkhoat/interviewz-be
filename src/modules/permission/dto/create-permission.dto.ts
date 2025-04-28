@@ -26,4 +26,4 @@ export class CreatePermissionDto {
   @IsArray()
   @IsOptional()
   menuIds?: number[];
-} 
+}

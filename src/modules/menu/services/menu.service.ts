@@ -56,14 +56,14 @@ export class MenuService {
 
     // Tạo danh sách tất cả permissions mà user có
     const userPermissions = new Set<number>();
-    
+
     // Thêm permissions từ role chính
     if (user.mainRole && user.mainRole.permissions) {
       user.mainRole.permissions.forEach((permission) => {
         userPermissions.add(permission.id);
       });
     }
-    
+
     // Thêm permissions từ các role bổ sung
     if (user.additionalRoles) {
       user.additionalRoles.forEach((role) => {
@@ -138,4 +138,4 @@ export class MenuService {
       throw new NotFoundException(`Menu with ID ${id} not found`);
     }
   }
-} 
+}

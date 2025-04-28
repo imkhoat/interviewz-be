@@ -18,4 +18,4 @@ import { AuthModule } from '../auth/auth.module';
   providers: [MenuService],
   exports: [MenuService],
 })
-export class MenuModule {} 
+export class MenuModule {}

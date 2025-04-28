@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
+} from 'typeorm';
 import { User } from '../../user/user.entity';
 import { Permission } from '../../permission/entities/permission.entity';
 import { Menu } from '../../menu/entities/menu.entity';
@@ -34,4 +41,4 @@ export class Role {
 
   @OneToMany(() => User, (user) => user.additionalRoles)
   additionalUsers?: User[];
-} 
+}

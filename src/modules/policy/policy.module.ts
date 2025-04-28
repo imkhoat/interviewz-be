@@ -6,4 +6,4 @@ import { Policy } from './entities/policy.entity';
   imports: [TypeOrmModule.forFeature([Policy])],
   exports: [TypeOrmModule],
 })
-export class PolicyModule {} 
+export class PolicyModule {}

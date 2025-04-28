@@ -16,4 +16,4 @@ export class Resource {
 
   @Column({ length: 255, nullable: true })
   description?: string;
-} 
+}
