@@ -2,7 +2,6 @@ import { UserRole } from '../user.entity';
 
 export class UserResponseDto {
   id: number;
-  username: string;
   email: string;
   firstName?: string;
   lastName?: string;
