@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PermissionService } from '../services/permission.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Permission } from '../entities/permission.entity';
-import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
 
 describe('PermissionService', () => {
   let service: PermissionService;
@@ -12,10 +12,12 @@ describe('PermissionService', () => {
   const mockPermission = {
     id: 1,
     name: 'view:dashboard',
-    description: 'View dashboard permission',
     code: 'VIEW_DASHBOARD',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    description: 'View dashboard permission',
+    roles: [],
+    menus: [],
+    createdAt: new Date('2025-04-28T16:47:11.428Z'),
+    updatedAt: new Date('2025-04-28T16:47:11.428Z'),
   } as Permission;
 
   beforeEach(async () => {
@@ -47,7 +49,7 @@ describe('PermissionService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all permissions', async () => {
+    it('should return an array of permissions', async () => {
       jest.spyOn(permissionRepository, 'find').mockResolvedValue([mockPermission]);
 
       const result = await service.findAll();
@@ -68,6 +70,7 @@ describe('PermissionService', () => {
       expect(result).toEqual(mockPermission);
       expect(permissionRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
+        relations: ['roles', 'menus'],
       });
     });
 
@@ -75,14 +78,18 @@ describe('PermissionService', () => {
       jest.spyOn(permissionRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
+      expect(permissionRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['roles', 'menus'],
+      });
     });
   });
 
   describe('create', () => {
     const createPermissionDto = {
-      name: 'new:permission',
-      description: 'New permission description',
-      code: 'NEW_PERMISSION',
+      name: 'view:dashboard',
+      code: 'VIEW_DASHBOARD',
+      description: 'View dashboard permission',
     };
 
     it('should create a new permission', async () => {
@@ -95,36 +102,38 @@ describe('PermissionService', () => {
 
       expect(result).toEqual(mockPermission);
       expect(permissionRepository.create).toHaveBeenCalledWith(createPermissionDto);
-      expect(permissionRepository.save).toHaveBeenCalled();
+      expect(permissionRepository.save).toHaveBeenCalledWith(mockPermission);
     });
   });
 
   describe('update', () => {
     const updatePermissionDto = {
       name: 'updated:permission',
-      description: 'Updated permission description',
       code: 'UPDATED_PERMISSION',
+      description: 'Updated permission description',
     };
 
     it('should update an existing permission', async () => {
+      const updatedPermission = {
+        ...mockPermission,
+        ...updatePermissionDto,
+      };
       jest
         .spyOn(permissionRepository, 'findOne')
         .mockResolvedValue(mockPermission);
-      jest.spyOn(permissionRepository, 'save').mockResolvedValue({
-        ...mockPermission,
-        ...updatePermissionDto,
-      });
+      jest.spyOn(permissionRepository, 'save').mockResolvedValue(updatedPermission);
 
       const result = await service.update(1, updatePermissionDto);
 
-      expect(result).toEqual({
+      expect(result).toEqual(updatedPermission);
+      expect(permissionRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['roles', 'menus'],
+      });
+      expect(permissionRepository.save).toHaveBeenCalledWith({
         ...mockPermission,
         ...updatePermissionDto,
       });
-      expect(permissionRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
-      expect(permissionRepository.save).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if permission not found', async () => {
@@ -133,6 +142,10 @@ describe('PermissionService', () => {
       await expect(service.update(1, updatePermissionDto)).rejects.toThrow(
         NotFoundException,
       );
+      expect(permissionRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['roles', 'menus'],
+      });
     });
   });
 
@@ -149,6 +162,7 @@ describe('PermissionService', () => {
 
       expect(permissionRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
+        relations: ['roles', 'menus'],
       });
       expect(permissionRepository.delete).toHaveBeenCalledWith(1);
     });
@@ -157,6 +171,10 @@ describe('PermissionService', () => {
       jest.spyOn(permissionRepository, 'findOne').mockResolvedValue(null);
 
       await expect(service.delete(1)).rejects.toThrow(NotFoundException);
+      expect(permissionRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+        relations: ['roles', 'menus'],
+      });
     });
   });
 }); 

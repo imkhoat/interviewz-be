@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, DeleteResult } from 'typeorm';
 import { MenuService } from '../services/menu.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { Menu } from '../entities/menu.entity';
 import { Role } from '../../role/entities/role.entity';
 import { Permission } from '../../permission/entities/permission.entity';
-import { User, UserRole } from '../../user/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { NotFoundException } from '@nestjs/common';
+import { In, Repository } from 'typeorm';
 
 describe('MenuService', () => {
   let service: MenuService;
@@ -14,51 +14,39 @@ describe('MenuService', () => {
   let roleRepository: Repository<Role>;
   let permissionRepository: Repository<Permission>;
 
-  const mockUser = {
+  const mockMenu = {
     id: 1,
-    email: 'john@example.com',
-    password: 'hashedPassword',
-    userRole: UserRole.USER,
-    refreshToken: null,
-    resetPasswordToken: null,
-    resetPasswordExpires: null,
-    firstName: 'John',
-    lastName: 'Doe',
-    isActive: true,
-    mainRoleId: null,
-    mainRole: null,
-    additionalRoles: [],
-    lastLoginAt: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    hashPassword: jest.fn(),
-    validatePassword: jest.fn(),
-    fullName: 'John Doe',
-  } as unknown as User;
+    name: 'Test Menu',
+    path: '/test',
+    icon: 'test-icon',
+    order: 1,
+    parentId: undefined,
+    roles: [],
+    permissions: [],
+  };
 
   const mockRole = {
     id: 1,
-    name: 'Admin',
-    description: 'Administrator role',
+    name: 'Test Role',
+    description: 'Test Description',
+    menus: [],
     permissions: [],
-  } as Role;
+  };
 
   const mockPermission = {
     id: 1,
-    name: 'view:dashboard',
-    description: 'View dashboard permission',
-    code: 'VIEW_DASHBOARD',
-  } as Permission;
-
-  const mockMenu = {
-    id: 1,
-    name: 'Dashboard',
-    path: '/dashboard',
-    icon: 'dashboard',
-    order: 1,
+    name: 'Test Permission',
+    description: 'Test Description',
+    menus: [],
     roles: [],
-    permissions: [],
-  } as Menu;
+  };
+
+  const mockUser = {
+    id: 1,
+    mainRole: mockRole,
+    roles: [mockRole],
+    permissions: [mockPermission],
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -67,24 +55,34 @@ describe('MenuService', () => {
         {
           provide: getRepositoryToken(Menu),
           useValue: {
-            find: jest.fn(),
-            findOne: jest.fn(),
-            create: jest.fn(),
-            save: jest.fn(),
-            update: jest.fn(),
-            delete: jest.fn(),
+            find: jest.fn().mockResolvedValue([mockMenu]),
+            findOne: jest.fn().mockResolvedValue(mockMenu),
+            create: jest.fn().mockReturnValue(mockMenu),
+            save: jest.fn().mockResolvedValue(mockMenu),
+            update: jest.fn().mockResolvedValue({ affected: 1 }),
+            remove: jest.fn().mockResolvedValue(mockMenu),
           },
         },
         {
           provide: getRepositoryToken(Role),
           useValue: {
-            findByIds: jest.fn(),
+            find: jest.fn().mockResolvedValue([mockRole]),
+            findOne: jest.fn().mockResolvedValue(mockRole),
+            create: jest.fn().mockReturnValue(mockRole),
+            save: jest.fn().mockResolvedValue(mockRole),
+            update: jest.fn().mockResolvedValue({ affected: 1 }),
+            remove: jest.fn().mockResolvedValue(mockRole),
           },
         },
         {
           provide: getRepositoryToken(Permission),
           useValue: {
-            findByIds: jest.fn(),
+            find: jest.fn().mockResolvedValue([mockPermission]),
+            findOne: jest.fn().mockResolvedValue(mockPermission),
+            create: jest.fn().mockReturnValue(mockPermission),
+            save: jest.fn().mockResolvedValue(mockPermission),
+            update: jest.fn().mockResolvedValue({ affected: 1 }),
+            remove: jest.fn().mockResolvedValue(mockPermission),
           },
         },
       ],
@@ -93,9 +91,7 @@ describe('MenuService', () => {
     service = module.get<MenuService>(MenuService);
     menuRepository = module.get<Repository<Menu>>(getRepositoryToken(Menu));
     roleRepository = module.get<Repository<Role>>(getRepositoryToken(Role));
-    permissionRepository = module.get<Repository<Permission>>(
-      getRepositoryToken(Permission),
-    );
+    permissionRepository = module.get<Repository<Permission>>(getRepositoryToken(Permission));
   });
 
   it('should be defined', () => {
@@ -103,176 +99,141 @@ describe('MenuService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all menus', async () => {
-      const findSpy = jest.spyOn(menuRepository, 'find');
-      findSpy.mockResolvedValue([mockMenu]);
-
+    it('should return an array of menus', async () => {
       const result = await service.findAll();
-
       expect(result).toEqual([mockMenu]);
-      expect(findSpy).toHaveBeenCalled();
+      expect(menuRepository.find).toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return a menu', async () => {
+      const result = await service.findOne(1);
+      expect(result).toEqual(mockMenu);
+      expect(menuRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+    });
+
+    it('should throw NotFoundException if menu not found', async () => {
+      jest.spyOn(menuRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
+      await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('create', () => {
+    it('should create a menu', async () => {
+      const createMenuDto = {
+        name: 'Test Menu',
+        path: '/test',
+        icon: 'test-icon',
+        order: 1,
+        parentId: undefined,
+        roleIds: [1],
+        permissionIds: [1],
+      };
+
+      const result = await service.create(createMenuDto);
+      expect(result).toEqual(mockMenu);
+      expect(menuRepository.create).toHaveBeenCalledWith(createMenuDto);
+      expect(menuRepository.save).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if role not found', async () => {
+      const createMenuDto = {
+        name: 'Test Menu',
+        path: '/test',
+        icon: 'test-icon',
+        order: 1,
+        parentId: undefined,
+        roleIds: [1],
+        permissionIds: [1],
+      };
+
+      jest.spyOn(roleRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
+      await expect(service.create(createMenuDto)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException if permission not found', async () => {
+      const createMenuDto = {
+        name: 'Test Menu',
+        path: '/test',
+        icon: 'test-icon',
+        order: 1,
+        parentId: undefined,
+        roleIds: [1],
+        permissionIds: [1],
+      };
+
+      jest.spyOn(permissionRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
+      await expect(service.create(createMenuDto)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('update', () => {
+    it('should update a menu', async () => {
+      const updateMenuDto = {
+        name: 'Updated Menu',
+        path: '/updated',
+        icon: 'updated-icon',
+        order: 2,
+        parentId: undefined,
+        roleIds: [1],
+        permissionIds: [1],
+      };
+
+      const result = await service.update(1, updateMenuDto);
+      expect(result).toEqual(mockMenu);
+      expect(menuRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(menuRepository.update).toHaveBeenCalledWith(1, updateMenuDto);
+    });
+
+    it('should throw NotFoundException if menu not found', async () => {
+      const updateMenuDto = {
+        name: 'Updated Menu',
+        path: '/updated',
+        icon: 'updated-icon',
+        order: 2,
+        parentId: undefined,
+        roleIds: [1],
+        permissionIds: [1],
+      };
+
+      jest.spyOn(menuRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
+      await expect(service.update(1, updateMenuDto)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove a menu', async () => {
+      const result = await service.remove(1);
+      expect(result).toEqual(mockMenu);
+      expect(menuRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(menuRepository.remove).toHaveBeenCalledWith(mockMenu);
+    });
+
+    it('should throw NotFoundException if menu not found', async () => {
+      jest.spyOn(menuRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
+      await expect(service.remove(1)).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('findUserMenus', () => {
     it('should return menus for user with roles and permissions', async () => {
-      const userWithRoles = {
-        ...mockUser,
-        roles: [mockRole],
-        permissions: [mockPermission],
-      };
-
-      const findSpy = jest.spyOn(menuRepository, 'find');
-      findSpy.mockResolvedValue([mockMenu]);
-
-      const result = await service.findUserMenus(userWithRoles.id);
-
+      const result = await service.findUserMenus(1);
       expect(result).toEqual([mockMenu]);
-      expect(findSpy).toHaveBeenCalled();
+      expect(menuRepository.manager.findOne).toHaveBeenCalledWith(User, {
+        where: { id: 1 },
+        relations: ['mainRole', 'roles', 'permissions'],
+      });
     });
 
     it('should return empty array if user has no roles or permissions', async () => {
-      const findSpy = jest.spyOn(menuRepository, 'find');
-      findSpy.mockResolvedValue([]);
-
-      const result = await service.findUserMenus(mockUser.id);
-
+      menuRepository.manager.findOne.mockResolvedValueOnce({
+        ...mockUser,
+        roles: [],
+        permissions: [],
+      });
+      const result = await service.findUserMenus(1);
       expect(result).toEqual([]);
-      expect(findSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('create', () => {
-    const createMenuDto = {
-      name: 'New Menu',
-      path: '/new-menu',
-      icon: 'new-icon',
-      order: 2,
-      parentId: undefined,
-      roleIds: [1],
-      permissionIds: [1],
-    };
-
-    it('should create a new menu', async () => {
-      const findByIdsSpy = jest.spyOn(roleRepository, 'findByIds');
-      findByIdsSpy.mockResolvedValue([mockRole]);
-
-      const findByIdsPermSpy = jest.spyOn(permissionRepository, 'findByIds');
-      findByIdsPermSpy.mockResolvedValue([mockPermission]);
-
-      const createSpy = jest.spyOn(menuRepository, 'create');
-      createSpy.mockReturnValue(mockMenu);
-
-      const saveSpy = jest.spyOn(menuRepository, 'save');
-      saveSpy.mockResolvedValue(mockMenu);
-
-      const result = await service.create(createMenuDto);
-
-      expect(result).toEqual(mockMenu);
-      expect(createSpy).toHaveBeenCalledWith({
-        ...createMenuDto,
-        roles: [mockRole],
-        permissions: [mockPermission],
-      });
-      expect(saveSpy).toHaveBeenCalled();
-    });
-
-    it('should throw NotFoundException if role not found', async () => {
-      const findByIdsSpy = jest.spyOn(roleRepository, 'findByIds');
-      findByIdsSpy.mockResolvedValue([]);
-
-      await expect(service.create(createMenuDto)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('should throw NotFoundException if permission not found', async () => {
-      const findByIdsSpy = jest.spyOn(roleRepository, 'findByIds');
-      findByIdsSpy.mockResolvedValue([mockRole]);
-
-      const findByIdsPermSpy = jest.spyOn(permissionRepository, 'findByIds');
-      findByIdsPermSpy.mockResolvedValue([]);
-
-      await expect(service.create(createMenuDto)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-  });
-
-  describe('update', () => {
-    const updateMenuDto = {
-      name: 'Updated Menu',
-      path: '/updated-menu',
-      icon: 'updated-icon',
-      order: 3,
-      parentId: undefined,
-      roleIds: [1],
-      permissionIds: [1],
-    };
-
-    it('should update an existing menu', async () => {
-      const findOneSpy = jest.spyOn(menuRepository, 'findOne');
-      findOneSpy.mockResolvedValue(mockMenu);
-
-      const findByIdsSpy = jest.spyOn(roleRepository, 'findByIds');
-      findByIdsSpy.mockResolvedValue([mockRole]);
-
-      const findByIdsPermSpy = jest.spyOn(permissionRepository, 'findByIds');
-      findByIdsPermSpy.mockResolvedValue([mockPermission]);
-
-      const saveSpy = jest.spyOn(menuRepository, 'save');
-      saveSpy.mockResolvedValue({
-        ...mockMenu,
-        ...updateMenuDto,
-      } as Menu);
-
-      const result = await service.update(1, updateMenuDto);
-
-      expect(result).toEqual({
-        ...mockMenu,
-        ...updateMenuDto,
-      });
-      expect(findOneSpy).toHaveBeenCalledWith({
-        where: { id: 1 },
-        relations: ['roles', 'permissions'],
-      });
-      expect(saveSpy).toHaveBeenCalled();
-    });
-
-    it('should throw NotFoundException if menu not found', async () => {
-      const findOneSpy = jest.spyOn(menuRepository, 'findOne');
-      findOneSpy.mockResolvedValue(null);
-
-      await expect(service.update(1, updateMenuDto)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-  });
-
-  describe('remove', () => {
-    it('should remove an existing menu', async () => {
-      const findOneSpy = jest.spyOn(menuRepository, 'findOne');
-      findOneSpy.mockResolvedValue(mockMenu);
-
-      const deleteSpy = jest.spyOn(menuRepository, 'delete');
-      deleteSpy.mockResolvedValue({
-        affected: 1,
-        raw: {},
-      } as DeleteResult);
-
-      await service.remove(1);
-
-      expect(findOneSpy).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
-      expect(deleteSpy).toHaveBeenCalledWith(1);
-    });
-
-    it('should throw NotFoundException if menu not found', async () => {
-      const findOneSpy = jest.spyOn(menuRepository, 'findOne');
-      findOneSpy.mockResolvedValue(null);
-
-      await expect(service.remove(1)).rejects.toThrow(NotFoundException);
     });
   });
 }); 
