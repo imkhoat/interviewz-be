@@ -56,7 +56,7 @@ describe('MenuService', () => {
           provide: getRepositoryToken(Menu),
           useValue: {
             find: jest.fn().mockResolvedValue([mockMenu]),
-            findOne: jest.fn().mockResolvedValue(mockMenu),
+            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockMenu)),
             create: jest.fn().mockReturnValue(mockMenu),
             save: jest.fn().mockResolvedValue(mockMenu),
             update: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -67,7 +67,7 @@ describe('MenuService', () => {
           provide: getRepositoryToken(Role),
           useValue: {
             find: jest.fn().mockResolvedValue([mockRole]),
-            findOne: jest.fn().mockResolvedValue(mockRole),
+            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockRole)),
             create: jest.fn().mockReturnValue(mockRole),
             save: jest.fn().mockResolvedValue(mockRole),
             update: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -78,7 +78,7 @@ describe('MenuService', () => {
           provide: getRepositoryToken(Permission),
           useValue: {
             find: jest.fn().mockResolvedValue([mockPermission]),
-            findOne: jest.fn().mockResolvedValue(mockPermission),
+            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockPermission)),
             create: jest.fn().mockReturnValue(mockPermission),
             save: jest.fn().mockResolvedValue(mockPermission),
             update: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -114,8 +114,12 @@ describe('MenuService', () => {
     });
 
     it('should throw NotFoundException if menu not found', async () => {
-      jest.spyOn(menuRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
-      await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(menuRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
+      await expect(service.findOne(1)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -148,8 +152,12 @@ describe('MenuService', () => {
         permissionIds: [1],
       };
 
-      jest.spyOn(roleRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
-      await expect(service.create(createMenuDto)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(roleRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
+      await expect(service.create(createMenuDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException if permission not found', async () => {
@@ -163,8 +171,12 @@ describe('MenuService', () => {
         permissionIds: [1],
       };
 
-      jest.spyOn(permissionRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
-      await expect(service.create(createMenuDto)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(permissionRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
+      await expect(service.create(createMenuDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -197,8 +209,12 @@ describe('MenuService', () => {
         permissionIds: [1],
       };
 
-      jest.spyOn(menuRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
-      await expect(service.update(1, updateMenuDto)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(menuRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
+      await expect(service.update(1, updateMenuDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -211,8 +227,12 @@ describe('MenuService', () => {
     });
 
     it('should throw NotFoundException if menu not found', async () => {
-      jest.spyOn(menuRepository, 'findOne').mockImplementation(() => Promise.resolve(null));
-      await expect(service.remove(1)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(menuRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
+      await expect(service.remove(1)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

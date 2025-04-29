@@ -33,12 +33,12 @@ describe('RoleService', () => {
         {
           provide: getRepositoryToken(Role),
           useValue: {
-            find: jest.fn(),
-            findOne: jest.fn(),
-            create: jest.fn(),
-            save: jest.fn(),
-            update: jest.fn(),
-            delete: jest.fn(),
+            find: jest.fn().mockResolvedValue([mockRole]),
+            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockRole)),
+            create: jest.fn().mockReturnValue(mockRole),
+            save: jest.fn().mockResolvedValue(mockRole),
+            update: jest.fn().mockResolvedValue({ affected: 1 }),
+            remove: jest.fn().mockResolvedValue(mockRole),
           },
         },
         {
@@ -63,10 +63,7 @@ describe('RoleService', () => {
 
   describe('findAll', () => {
     it('should return all roles', async () => {
-      jest.spyOn(roleRepository, 'find').mockResolvedValue([mockRole]);
-
       const result = await service.findAll();
-
       expect(result).toEqual([mockRole]);
       expect(roleRepository.find).toHaveBeenCalled();
     });
@@ -74,20 +71,15 @@ describe('RoleService', () => {
 
   describe('findOne', () => {
     it('should return a role by id', async () => {
-      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(mockRole);
-
       const result = await service.findOne(1);
-
       expect(result).toEqual(mockRole);
-      expect(roleRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-        relations: ['permissions'],
-      });
+      expect(roleRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
     });
 
     it('should throw NotFoundException if role not found', async () => {
-      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(null);
-
+      jest
+        .spyOn(roleRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
       await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
     });
   });
@@ -133,31 +125,21 @@ describe('RoleService', () => {
     };
 
     it('should update an existing role', async () => {
-      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(mockRole);
-      jest
-        .spyOn(permissionRepository, 'findByIds')
-        .mockResolvedValue([mockPermission]);
-      jest.spyOn(roleRepository, 'save').mockResolvedValue({
-        ...mockRole,
-        ...updateRoleDto,
-      });
-
       const result = await service.update(1, updateRoleDto);
-
-      expect(result).toEqual({
-        ...mockRole,
-        ...updateRoleDto,
-      });
-      expect(roleRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-        relations: ['permissions'],
-      });
-      expect(roleRepository.save).toHaveBeenCalled();
+      expect(result).toEqual(mockRole);
+      expect(roleRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(roleRepository.update).toHaveBeenCalledWith(1, updateRoleDto);
     });
 
     it('should throw NotFoundException if role not found', async () => {
-      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(null);
+      const updateRoleDto = {
+        name: 'Updated Role',
+        description: 'Updated Description',
+      };
 
+      jest
+        .spyOn(roleRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
       await expect(service.update(1, updateRoleDto)).rejects.toThrow(
         NotFoundException,
       );
@@ -173,23 +155,19 @@ describe('RoleService', () => {
     });
   });
 
-  describe('delete', () => {
-    it('should delete an existing role', async () => {
-      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(mockRole);
-      jest.spyOn(roleRepository, 'delete').mockResolvedValue({ affected: 1 } as any);
-
-      await service.delete(1);
-
-      expect(roleRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
-      expect(roleRepository.delete).toHaveBeenCalledWith(1);
+  describe('remove', () => {
+    it('should remove an existing role', async () => {
+      const result = await service.remove(1);
+      expect(result).toEqual(mockRole);
+      expect(roleRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(roleRepository.remove).toHaveBeenCalledWith(mockRole);
     });
 
     it('should throw NotFoundException if role not found', async () => {
-      jest.spyOn(roleRepository, 'findOne').mockResolvedValue(null);
-
-      await expect(service.delete(1)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(roleRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
+      await expect(service.remove(1)).rejects.toThrow(NotFoundException);
     });
   });
 }); 

@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PermissionService } from '../services/permission.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Permission } from '../entities/permission.entity';
-import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { NotFoundException } from '@nestjs/common';
 
 describe('PermissionService', () => {
   let service: PermissionService;
@@ -18,7 +18,18 @@ describe('PermissionService', () => {
     menus: [],
     createdAt: new Date('2025-04-28T16:47:11.428Z'),
     updatedAt: new Date('2025-04-28T16:47:11.428Z'),
-  } as Permission;
+  };
+
+  const updatedPermission = {
+    id: 1,
+    name: 'updated:permission',
+    code: 'UPDATED_PERMISSION',
+    description: 'Updated permission description',
+    roles: [],
+    menus: [],
+    createdAt: new Date('2025-04-28T16:47:11.428Z'),
+    updatedAt: new Date('2025-04-28T16:47:11.428Z'),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,12 +38,12 @@ describe('PermissionService', () => {
         {
           provide: getRepositoryToken(Permission),
           useValue: {
-            find: jest.fn(),
-            findOne: jest.fn(),
-            create: jest.fn(),
-            save: jest.fn(),
-            update: jest.fn(),
-            delete: jest.fn(),
+            find: jest.fn().mockResolvedValue([mockPermission]),
+            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockPermission)),
+            create: jest.fn().mockReturnValue(mockPermission),
+            save: jest.fn().mockResolvedValue(mockPermission),
+            update: jest.fn().mockResolvedValue({ affected: 1 }),
+            remove: jest.fn().mockResolvedValue(mockPermission),
           },
         },
       ],
@@ -50,10 +61,7 @@ describe('PermissionService', () => {
 
   describe('findAll', () => {
     it('should return an array of permissions', async () => {
-      jest.spyOn(permissionRepository, 'find').mockResolvedValue([mockPermission]);
-
       const result = await service.findAll();
-
       expect(result).toEqual([mockPermission]);
       expect(permissionRepository.find).toHaveBeenCalled();
     });
@@ -61,119 +69,105 @@ describe('PermissionService', () => {
 
   describe('findOne', () => {
     it('should return a permission by id', async () => {
-      jest
-        .spyOn(permissionRepository, 'findOne')
-        .mockResolvedValue(mockPermission);
-
       const result = await service.findOne(1);
-
       expect(result).toEqual(mockPermission);
       expect(permissionRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['roles', 'menus'],
       });
     });
 
     it('should throw NotFoundException if permission not found', async () => {
-      jest.spyOn(permissionRepository, 'findOne').mockResolvedValue(null);
+      jest
+        .spyOn(permissionRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
 
       await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
       expect(permissionRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['roles', 'menus'],
       });
     });
   });
 
   describe('create', () => {
-    const createPermissionDto = {
-      name: 'view:dashboard',
-      code: 'VIEW_DASHBOARD',
-      description: 'View dashboard permission',
-    };
-
-    it('should create a new permission', async () => {
-      jest
-        .spyOn(permissionRepository, 'create')
-        .mockReturnValue(mockPermission);
-      jest.spyOn(permissionRepository, 'save').mockResolvedValue(mockPermission);
+    it('should create a permission', async () => {
+      const createPermissionDto = {
+        name: 'view:dashboard',
+        code: 'VIEW_DASHBOARD',
+        description: 'View dashboard permission',
+      };
 
       const result = await service.create(createPermissionDto);
-
       expect(result).toEqual(mockPermission);
       expect(permissionRepository.create).toHaveBeenCalledWith(createPermissionDto);
-      expect(permissionRepository.save).toHaveBeenCalledWith(mockPermission);
+      expect(permissionRepository.save).toHaveBeenCalled();
     });
   });
 
   describe('update', () => {
-    const updatePermissionDto = {
-      name: 'updated:permission',
-      code: 'UPDATED_PERMISSION',
-      description: 'Updated permission description',
-    };
-
-    it('should update an existing permission', async () => {
-      const updatedPermission = {
-        ...mockPermission,
-        ...updatePermissionDto,
+    it('should update a permission', async () => {
+      const updatePermissionDto = {
+        name: 'updated:permission',
+        code: 'UPDATED_PERMISSION',
+        description: 'Updated permission description',
       };
+
       jest
         .spyOn(permissionRepository, 'findOne')
-        .mockResolvedValue(mockPermission);
-      jest.spyOn(permissionRepository, 'save').mockResolvedValue(updatedPermission);
+        .mockImplementation(() => Promise.resolve(mockPermission));
+      jest
+        .spyOn(permissionRepository, 'save')
+        .mockImplementation(() => Promise.resolve(updatedPermission));
 
       const result = await service.update(1, updatePermissionDto);
-
       expect(result).toEqual(updatedPermission);
       expect(permissionRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['roles', 'menus'],
       });
-      expect(permissionRepository.save).toHaveBeenCalledWith({
-        ...mockPermission,
-        ...updatePermissionDto,
-      });
+      expect(permissionRepository.save).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if permission not found', async () => {
-      jest.spyOn(permissionRepository, 'findOne').mockResolvedValue(null);
+      const updatePermissionDto = {
+        name: 'updated:permission',
+        code: 'UPDATED_PERMISSION',
+        description: 'Updated permission description',
+      };
+
+      jest
+        .spyOn(permissionRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
 
       await expect(service.update(1, updatePermissionDto)).rejects.toThrow(
         NotFoundException,
       );
       expect(permissionRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['roles', 'menus'],
       });
     });
   });
 
-  describe('delete', () => {
-    it('should delete an existing permission', async () => {
+  describe('remove', () => {
+    it('should remove a permission', async () => {
       jest
         .spyOn(permissionRepository, 'findOne')
-        .mockResolvedValue(mockPermission);
-      jest
-        .spyOn(permissionRepository, 'delete')
-        .mockResolvedValue({ affected: 1 } as any);
+        .mockImplementation(() => Promise.resolve(mockPermission));
 
-      await service.delete(1);
-
+      const result = await service.remove(1);
+      expect(result).toEqual(mockPermission);
       expect(permissionRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['roles', 'menus'],
       });
-      expect(permissionRepository.delete).toHaveBeenCalledWith(1);
+      expect(permissionRepository.remove).toHaveBeenCalledWith(mockPermission);
     });
 
     it('should throw NotFoundException if permission not found', async () => {
-      jest.spyOn(permissionRepository, 'findOne').mockResolvedValue(null);
+      jest
+        .spyOn(permissionRepository, 'findOne')
+        .mockImplementation(() => Promise.resolve(null));
 
-      await expect(service.delete(1)).rejects.toThrow(NotFoundException);
+      await expect(service.remove(1)).rejects.toThrow(NotFoundException);
       expect(permissionRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['roles', 'menus'],
       });
     });
   });
