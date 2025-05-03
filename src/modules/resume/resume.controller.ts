@@ -1,5 +1,5 @@
 import { Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('resume')
 @UseGuards(JwtAuthGuard)

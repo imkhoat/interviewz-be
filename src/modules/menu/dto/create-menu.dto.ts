@@ -5,25 +5,33 @@ import {
   IsArray,
   IsBoolean,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMenuDto {
+  @ApiProperty({ description: 'The name of the menu' })
   @IsString()
+  @IsNotEmpty()
   name: string;
 
-  @IsString()
-  path: string;
-
+  @ApiProperty({ description: 'The icon of the menu', required: false })
   @IsString()
   @IsOptional()
   icon?: string;
 
-  @IsNumber()
+  @ApiProperty({ description: 'The path of the menu', required: false })
+  @IsString()
   @IsOptional()
-  order?: number;
+  path?: string;
 
+  @ApiProperty({ description: 'The order of the menu' })
   @IsNumber()
+  @IsNotEmpty()
+  order: number;
+
+  @ApiProperty({ description: 'The parent menu id', required: false })
+  @IsString()
   @IsOptional()
-  parentId?: number;
+  parentId?: string;
 
   @IsArray()
   @IsOptional()

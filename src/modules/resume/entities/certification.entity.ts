@@ -8,46 +8,65 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Resume } from './resume.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Certification {
+  @ApiProperty({ description: 'The unique identifier of the certification' })
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  resumeId: string;
-
+  @ApiProperty({ description: 'The name of the certification' })
   @Column()
   name: string;
 
-  @Column({ nullable: true })
-  issuer?: string;
+  @ApiProperty({ description: 'The issuing organization' })
+  @Column()
+  organization: string;
 
-  @Column({ type: 'date' })
+  @ApiProperty({ description: 'The issue date of the certification' })
+  @Column()
   issueDate: Date;
 
-  @Column({ type: 'date', nullable: true })
-  expiryDate?: Date;
+  @ApiProperty({
+    description: 'The expiration date of the certification',
+    required: false,
+  })
+  @Column({ nullable: true })
+  expirationDate?: Date;
 
-  @Column({ default: false })
-  isCurrent: boolean;
+  @ApiProperty({ description: 'The credential ID', required: false })
+  @Column({ nullable: true })
+  credentialId?: string;
 
-  @Column({ type: 'text', nullable: true })
-  description?: string;
+  @ApiProperty({ description: 'The credential URL', required: false })
+  @Column({ nullable: true })
+  credentialUrl?: string;
 
-  @Column({ type: 'integer' })
-  itemOrder: number;
-
+  @ApiProperty({
+    description: 'Additional metadata in JSON format',
+    required: false,
+  })
   @Column({ type: 'jsonb', nullable: true })
   metadata?: Record<string, any>;
 
-  @ManyToOne(() => Resume, (resume) => resume.certifications)
-  @JoinColumn({ name: 'resumeId' })
-  resume: Resume;
-
+  @ApiProperty({ description: 'The date when the certification was created' })
   @CreateDateColumn()
   createdAt: Date;
 
+  @ApiProperty({
+    description: 'The date when the certification was last updated',
+  })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ApiProperty({
+    type: () => Resume,
+    description: 'The resume this certification belongs to',
+  })
+  @ManyToOne(() => Resume, (resume) => resume.certifications, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'resumeId' })
+  resume: Resume;
 }

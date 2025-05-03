@@ -184,11 +184,83 @@ npm run migration:revert
 
 **Note**: Always backup your database before running migrations in production.
 
-### API Documentation
+### API Documentation with Swagger
 
-Once the application is running, you can access the API documentation at:
-- Swagger UI: http://localhost:3000/api
-- OpenAPI JSON: http://localhost:3000/api-json
+The API documentation is available using Swagger UI. After starting the application, you can access the documentation at:
+
+```
+http://localhost:3000/api
+```
+
+### Features
+
+- Interactive API documentation
+- Test API endpoints directly from the browser
+- View request/response schemas
+- Authentication support
+
+### Authentication
+
+To use authenticated endpoints in Swagger UI:
+
+1. Click the "Authorize" button at the top of the page
+2. Enter your JWT token in the format: `Bearer your_jwt_token`
+3. Click "Authorize"
+
+### Available API Endpoints
+
+The following modules are documented:
+
+1. **Auth Module**
+   - Login
+   - Register
+   - Refresh Token
+
+2. **User Module**
+   - User CRUD operations
+   - Profile management
+
+3. **Role Module**
+   - Role CRUD operations
+   - Role permissions management
+
+4. **Permission Module**
+   - Permission CRUD operations
+
+5. **Menu Module**
+   - Menu CRUD operations
+   - Menu hierarchy management
+
+6. **Policy Module**
+   - Policy CRUD operations
+   - Policy conditions management
+
+7. **Resource Module**
+   - Resource CRUD operations
+   - Resource access control
+
+8. **Resume Module**
+   - Resume CRUD operations
+   - Resume sections management
+   - Work experience management
+   - Education management
+   - Skills management
+   - Projects management
+   - Certifications management
+
+### Example Usage
+
+1. Start the application:
+```bash
+docker-compose up --build
+```
+
+2. Open your browser and navigate to:
+```
+http://localhost:3000/api
+```
+
+3. Explore the API documentation and try out the endpoints.
 
 ## Testing
 

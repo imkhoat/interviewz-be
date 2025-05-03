@@ -6,9 +6,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { JwtAuthGuard } from '../auth/auth.guard';
-import { RoleGuard } from '../auth/role.guard';
-import { Roles } from '../auth/role.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RoleGuard } from '../auth/guards/role.guard';
+import { Roles } from '../auth/decorators/role.decorator';
 import { UserRole } from './user.entity';
 
 @Controller('users')
