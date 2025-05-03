@@ -34,7 +34,9 @@ describe('RoleService', () => {
           provide: getRepositoryToken(Role),
           useValue: {
             find: jest.fn().mockResolvedValue([mockRole]),
-            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockRole)),
+            findOne: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve(mockRole)),
             create: jest.fn().mockReturnValue(mockRole),
             save: jest.fn().mockResolvedValue(mockRole),
             update: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -170,4 +172,4 @@ describe('RoleService', () => {
       await expect(service.remove(1)).rejects.toThrow(NotFoundException);
     });
   });
-}); 
+});

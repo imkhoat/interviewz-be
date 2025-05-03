@@ -90,11 +90,25 @@ describe('AuthService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: {
-            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockUser as unknown as User)),
-            find: jest.fn().mockImplementation(() => Promise.resolve([mockUser as unknown as User])),
+            findOne: jest
+              .fn()
+              .mockImplementation(() =>
+                Promise.resolve(mockUser as unknown as User),
+              ),
+            find: jest
+              .fn()
+              .mockImplementation(() =>
+                Promise.resolve([mockUser as unknown as User]),
+              ),
             create: jest.fn().mockReturnValue(mockUser as unknown as User),
-            save: jest.fn().mockImplementation(() => Promise.resolve(mockUser as unknown as User)),
-            update: jest.fn().mockImplementation(() => Promise.resolve({ affected: 1 })),
+            save: jest
+              .fn()
+              .mockImplementation(() =>
+                Promise.resolve(mockUser as unknown as User),
+              ),
+            update: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve({ affected: 1 })),
           },
         },
         {
@@ -125,7 +139,9 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return user without password if validation succeeds', async () => {
-      (argon2.verify as jest.Mock).mockImplementation(() => Promise.resolve(true));
+      (argon2.verify as jest.Mock).mockImplementation(() =>
+        Promise.resolve(true),
+      );
 
       const result = await service.validateUser('test@example.com', 'password');
       expect(result).toEqual(mockUserWithoutPassword);
@@ -141,9 +157,14 @@ describe('AuthService', () => {
     });
 
     it('should return null if password is invalid', async () => {
-      (argon2.verify as jest.Mock).mockImplementation(() => Promise.resolve(false));
+      (argon2.verify as jest.Mock).mockImplementation(() =>
+        Promise.resolve(false),
+      );
 
-      const result = await service.validateUser('test@example.com', 'wrongpassword');
+      const result = await service.validateUser(
+        'test@example.com',
+        'wrongpassword',
+      );
       expect(result).toBeNull();
     });
   });
@@ -158,7 +179,9 @@ describe('AuthService', () => {
         fullName: 'John Doe',
       };
 
-      (argon2.hash as jest.Mock).mockImplementation(() => Promise.resolve('hashedPassword'));
+      (argon2.hash as jest.Mock).mockImplementation(() =>
+        Promise.resolve('hashedPassword'),
+      );
 
       const result = await service.signup(signupDto);
       expect(result).toEqual(mockUserWithoutPassword);
@@ -179,13 +202,17 @@ describe('AuthService', () => {
         .spyOn(userRepository, 'findOne')
         .mockImplementation(() => Promise.resolve(mockUser as unknown as User));
 
-      await expect(service.signup(signupDto)).rejects.toThrow(BadRequestException);
+      await expect(service.signup(signupDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
   describe('login', () => {
     it('should return access token and user data', async () => {
-      (argon2.verify as jest.Mock).mockImplementation(() => Promise.resolve(true));
+      (argon2.verify as jest.Mock).mockImplementation(() =>
+        Promise.resolve(true),
+      );
 
       const result = await service.login('test@example.com', 'password');
       expect(result).toEqual({
@@ -199,17 +226,19 @@ describe('AuthService', () => {
         .spyOn(userRepository, 'findOne')
         .mockImplementation(() => Promise.resolve(null));
 
-      await expect(service.login('test@example.com', 'password')).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        service.login('test@example.com', 'password'),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException if password is invalid', async () => {
-      (argon2.verify as jest.Mock).mockImplementation(() => Promise.resolve(false));
-
-      await expect(service.login('test@example.com', 'wrongpassword')).rejects.toThrow(
-        UnauthorizedException,
+      (argon2.verify as jest.Mock).mockImplementation(() =>
+        Promise.resolve(false),
       );
+
+      await expect(
+        service.login('test@example.com', 'wrongpassword'),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -225,8 +254,12 @@ describe('AuthService', () => {
         .spyOn(userRepository, 'find')
         .mockImplementation(() => Promise.resolve([mockUserWithToken]));
 
-      (argon2.verify as jest.Mock).mockImplementation(() => Promise.resolve(true));
-      (argon2.hash as jest.Mock).mockImplementation(() => Promise.resolve('newHashedPassword'));
+      (argon2.verify as jest.Mock).mockImplementation(() =>
+        Promise.resolve(true),
+      );
+      (argon2.hash as jest.Mock).mockImplementation(() =>
+        Promise.resolve('newHashedPassword'),
+      );
 
       const result = await service.resetPassword({
         token: 'validToken',
@@ -291,17 +324,19 @@ describe('AuthService', () => {
         .spyOn(userRepository, 'findOne')
         .mockImplementation(() => Promise.resolve(null));
 
-      await expect(service.refreshToken(1, 'valid-refresh-token')).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        service.refreshToken(1, 'valid-refresh-token'),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException when refresh token is invalid', async () => {
-      (argon2.verify as jest.Mock).mockImplementation(() => Promise.resolve(false));
-
-      await expect(service.refreshToken(1, 'invalid-refresh-token')).rejects.toThrow(
-        UnauthorizedException,
+      (argon2.verify as jest.Mock).mockImplementation(() =>
+        Promise.resolve(false),
       );
+
+      await expect(
+        service.refreshToken(1, 'invalid-refresh-token'),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -358,7 +393,9 @@ describe('AuthService', () => {
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
       });
-      expect(mockUser.validatePassword).toHaveBeenCalledWith('current-password');
+      expect(mockUser.validatePassword).toHaveBeenCalledWith(
+        'current-password',
+      );
       expect(mockUser.hashPassword).toHaveBeenCalled();
       expect(userRepository.save).toHaveBeenCalled();
     });
@@ -366,18 +403,18 @@ describe('AuthService', () => {
     it('should throw NotFoundException when user is not found', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.changePassword(1, changePasswordDto)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.changePassword(1, changePasswordDto),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException when current password is invalid', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
       jest.spyOn(mockUser, 'validatePassword').mockResolvedValue(false);
 
-      await expect(service.changePassword(1, changePasswordDto)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.changePassword(1, changePasswordDto),
+      ).rejects.toThrow(BadRequestException);
     });
   });
-}); 
+});

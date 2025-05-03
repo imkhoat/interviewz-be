@@ -17,7 +17,9 @@ export class PermissionService {
   }
 
   async findOne(id: number): Promise<Permission> {
-    const permission = await this.permissionRepository.findOne({ where: { id } });
+    const permission = await this.permissionRepository.findOne({
+      where: { id },
+    });
     if (!permission) {
       throw new NotFoundException(`Permission with ID ${id} not found`);
     }
@@ -29,7 +31,10 @@ export class PermissionService {
     return this.permissionRepository.save(permission);
   }
 
-  async update(id: number, updatePermissionDto: UpdatePermissionDto): Promise<Permission> {
+  async update(
+    id: number,
+    updatePermissionDto: UpdatePermissionDto,
+  ): Promise<Permission> {
     await this.permissionRepository.update(id, updatePermissionDto);
     return this.findOne(id);
   }
@@ -40,4 +45,4 @@ export class PermissionService {
       throw new NotFoundException(`Permission with ID ${id} not found`);
     }
   }
-} 
+}

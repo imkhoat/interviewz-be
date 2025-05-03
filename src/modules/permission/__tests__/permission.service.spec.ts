@@ -39,7 +39,9 @@ describe('PermissionService', () => {
           provide: getRepositoryToken(Permission),
           useValue: {
             find: jest.fn().mockResolvedValue([mockPermission]),
-            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockPermission)),
+            findOne: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve(mockPermission)),
             create: jest.fn().mockReturnValue(mockPermission),
             save: jest.fn().mockResolvedValue(mockPermission),
             update: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -98,7 +100,9 @@ describe('PermissionService', () => {
 
       const result = await service.create(createPermissionDto);
       expect(result).toEqual(mockPermission);
-      expect(permissionRepository.create).toHaveBeenCalledWith(createPermissionDto);
+      expect(permissionRepository.create).toHaveBeenCalledWith(
+        createPermissionDto,
+      );
       expect(permissionRepository.save).toHaveBeenCalled();
     });
   });
@@ -171,4 +175,4 @@ describe('PermissionService', () => {
       });
     });
   });
-}); 
+});
