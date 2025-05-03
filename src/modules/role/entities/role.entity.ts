@@ -2,43 +2,36 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  CreateDateColumn,
+  UpdateDateColumn,
   ManyToMany,
   JoinTable,
-  OneToMany,
 } from 'typeorm';
-import { User } from '../../user/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { Permission } from '../../permission/entities/permission.entity';
-import { Menu } from '../../menu/entities/menu.entity';
-import { Policy } from '../../policy/entities/policy.entity';
 
 @Entity('roles')
 export class Role {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 50, unique: true })
+  @Column({ unique: true })
   name: string;
 
-  @Column({ length: 255, nullable: true })
-  description?: string;
+  @Column({ nullable: true })
+  description: string;
 
-  @ManyToMany(() => Permission, (permission) => permission.roles)
-  @JoinTable({
-    name: 'role_permissions',
-    joinColumn: { name: 'roleId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'permissionId', referencedColumnName: 'id' },
-  })
-  permissions?: Permission[];
+  @ManyToMany(() => User)
+  @JoinTable()
+  users: User[];
 
-  @ManyToMany(() => Menu, (menu) => menu.roles)
-  menus?: Menu[];
+  @ManyToMany(() => Permission)
+  @JoinTable()
+  permissions: Permission[];
 
-  @ManyToMany(() => Policy, (policy) => policy.roles)
-  policies?: Policy[];
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @OneToMany(() => User, (user) => user.mainRole)
-  users?: User[];
-
-  @OneToMany(() => User, (user) => user.additionalRoles)
-  additionalUsers?: User[];
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

@@ -1,13 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
-import { Role } from '../../role/entities/role.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
+import { Resume } from '../../resume/entities/resume.entity';
+import { Role as RoleEntity } from '../../role/entities/role.entity';
 import { Permission } from '../../permission/entities/permission.entity';
+import { Role } from '../enums/role.enum';
 import { UserRole } from '../enums/user-role.enum';
 import * as argon2 from 'argon2';
 
-@Entity()
+@Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   email: string;
@@ -15,11 +17,17 @@ export class User {
   @Column()
   password: string;
 
-  @Column()
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  role: Role;
+
+  @Column({ nullable: true })
   firstName: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastName: string;
+
+  @OneToMany(() => Resume, (resume) => resume.user)
+  resumes: Resume[];
 
   @Column({
     type: 'enum',
@@ -43,12 +51,12 @@ export class User {
   @Column({ nullable: true })
   mainRoleId: number;
 
-  @ManyToOne(() => Role, { nullable: true })
-  mainRole: Role;
+  @ManyToOne(() => RoleEntity, { nullable: true })
+  mainRole: RoleEntity;
 
-  @ManyToMany(() => Role)
+  @ManyToMany(() => RoleEntity)
   @JoinTable()
-  additionalRoles: Role[];
+  additionalRoles: RoleEntity[];
 
   @ManyToMany(() => Permission)
   @JoinTable()
