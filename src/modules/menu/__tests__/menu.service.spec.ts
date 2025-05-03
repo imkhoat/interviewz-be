@@ -56,7 +56,9 @@ describe('MenuService', () => {
           provide: getRepositoryToken(Menu),
           useValue: {
             find: jest.fn().mockResolvedValue([mockMenu]),
-            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockMenu)),
+            findOne: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve(mockMenu)),
             create: jest.fn().mockReturnValue(mockMenu),
             save: jest.fn().mockResolvedValue(mockMenu),
             update: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -67,7 +69,9 @@ describe('MenuService', () => {
           provide: getRepositoryToken(Role),
           useValue: {
             find: jest.fn().mockResolvedValue([mockRole]),
-            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockRole)),
+            findOne: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve(mockRole)),
             create: jest.fn().mockReturnValue(mockRole),
             save: jest.fn().mockResolvedValue(mockRole),
             update: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -78,7 +82,9 @@ describe('MenuService', () => {
           provide: getRepositoryToken(Permission),
           useValue: {
             find: jest.fn().mockResolvedValue([mockPermission]),
-            findOne: jest.fn().mockImplementation(() => Promise.resolve(mockPermission)),
+            findOne: jest
+              .fn()
+              .mockImplementation(() => Promise.resolve(mockPermission)),
             create: jest.fn().mockReturnValue(mockPermission),
             save: jest.fn().mockResolvedValue(mockPermission),
             update: jest.fn().mockResolvedValue({ affected: 1 }),
@@ -91,7 +97,9 @@ describe('MenuService', () => {
     service = module.get<MenuService>(MenuService);
     menuRepository = module.get<Repository<Menu>>(getRepositoryToken(Menu));
     roleRepository = module.get<Repository<Role>>(getRepositoryToken(Role));
-    permissionRepository = module.get<Repository<Permission>>(getRepositoryToken(Permission));
+    permissionRepository = module.get<Repository<Permission>>(
+      getRepositoryToken(Permission),
+    );
   });
 
   it('should be defined', () => {
@@ -117,9 +125,7 @@ describe('MenuService', () => {
       jest
         .spyOn(menuRepository, 'findOne')
         .mockImplementation(() => Promise.resolve(null));
-      await expect(service.findOne(1)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -230,9 +236,7 @@ describe('MenuService', () => {
       jest
         .spyOn(menuRepository, 'findOne')
         .mockImplementation(() => Promise.resolve(null));
-      await expect(service.remove(1)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.remove(1)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -256,4 +260,4 @@ describe('MenuService', () => {
       expect(result).toEqual([]);
     });
   });
-}); 
+});

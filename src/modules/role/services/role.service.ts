@@ -33,7 +33,8 @@ export class RoleService {
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
     const { permissionIds = [], ...roleData } = createRoleDto;
-    const permissions = await this.permissionRepository.findByIds(permissionIds);
+    const permissions =
+      await this.permissionRepository.findByIds(permissionIds);
 
     if (permissions.length !== permissionIds.length) {
       throw new NotFoundException('One or more permissions not found');
@@ -52,7 +53,8 @@ export class RoleService {
     const role = await this.findOne(id);
 
     if (permissionIds && permissionIds.length > 0) {
-      const permissions = await this.permissionRepository.findByIds(permissionIds);
+      const permissions =
+        await this.permissionRepository.findByIds(permissionIds);
       if (permissions.length !== permissionIds.length) {
         throw new NotFoundException('One or more permissions not found');
       }
@@ -67,4 +69,4 @@ export class RoleService {
     const role = await this.findOne(id);
     return this.roleRepository.remove(role);
   }
-} 
+}
