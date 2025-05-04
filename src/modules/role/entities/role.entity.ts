@@ -6,7 +6,7 @@ import {
   JoinTable,
   OneToMany,
 } from 'typeorm';
-import { User } from '../../user/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { Permission } from '../../permission/entities/permission.entity';
 import { Menu } from '../../menu/entities/menu.entity';
 import { Policy } from '../../policy/entities/policy.entity';

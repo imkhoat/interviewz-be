@@ -15,7 +15,7 @@ import { UpdateMenuDto } from '../dto/update-menu.dto';
 import { JwtAuthGuard } from '../../auth/guards/auth.guard';
 import { RoleGuard } from '../../auth/guards/role.guard';
 import { Roles } from '../../auth/decorators/role.decorator';
-import { UserRole } from '../../user/user.entity';
+import { UserRole } from '../../user/entities/user.entity';
 
 @Controller('menus')
 @UseGuards(JwtAuthGuard, RoleGuard)
