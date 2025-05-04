@@ -184,11 +184,118 @@ npm run migration:revert
 
 **Note**: Always backup your database before running migrations in production.
 
-### API Documentation
+## API Documentation
 
-Once the application is running, you can access the API documentation at:
-- Swagger UI: http://localhost:3000/api
-- OpenAPI JSON: http://localhost:3000/api-json
+The API documentation is available at `/api/docs` endpoint when the application is running. The documentation is generated using Swagger/OpenAPI.
+
+### Accessing the API Documentation
+
+1. Start the application:
+   ```bash
+   npm run start:dev
+   ```
+
+2. Open your browser and navigate to:
+   ```
+   http://localhost:3000/api/docs
+   ```
+
+### Authentication
+
+The API uses JWT (JSON Web Token) for authentication. To access protected endpoints:
+
+1. First, obtain a JWT token by calling the login endpoint
+2. Click the "Authorize" button in the Swagger UI
+3. Enter your JWT token in the format: `Bearer <your-token>`
+
+### API Endpoints
+
+The API is organized into the following modules:
+
+#### Authentication (`/auth`)
+- Login
+- Register
+- Refresh token
+- Logout
+
+#### Users (`/users`)
+- Get user profile
+- Update user profile
+- Change password
+- Get all users (admin only)
+
+#### Roles (`/roles`)
+- Create role
+- Get all roles
+- Get role by ID
+- Update role
+- Delete role
+
+#### Permissions (`/permissions`)
+- Create permission
+- Get all permissions
+- Get permission by ID
+- Update permission
+- Delete permission
+
+#### Menus (`/menus`)
+- Create menu
+- Get all menus
+- Get menu by ID
+- Update menu
+- Delete menu
+
+#### Policies (`/policies`)
+- Create policy
+- Get all policies
+- Get policy by ID
+- Update policy
+- Delete policy
+
+#### Resources (`/resources`)
+- Create resource
+- Get all resources
+- Get resource by ID
+- Update resource
+- Delete resource
+
+#### Resumes (`/resumes`)
+- Create resume
+- Get all resumes
+- Get resume by ID
+- Update resume
+- Delete resume
+
+### Error Responses
+
+The API uses standard HTTP status codes to indicate the success or failure of a request:
+
+- `200 OK`: The request was successful
+- `201 Created`: The resource was created successfully
+- `400 Bad Request`: The request was invalid
+- `401 Unauthorized`: Authentication failed
+- `403 Forbidden`: The user doesn't have permission to access the resource
+- `404 Not Found`: The resource was not found
+- `500 Internal Server Error`: An error occurred on the server
+
+### Rate Limiting
+
+The API implements rate limiting to prevent abuse. The current limits are:
+
+- 100 requests per minute for authenticated users
+- 20 requests per minute for unauthenticated users
+
+### Security
+
+- All API endpoints are protected by HTTPS
+- JWT tokens expire after 1 hour
+- Refresh tokens expire after 7 days
+- Passwords are hashed using bcrypt
+- API keys are required for certain endpoints
+
+### Support
+
+If you have any questions or need assistance, please contact the development team at support@interviewz.com
 
 ## Testing
 
