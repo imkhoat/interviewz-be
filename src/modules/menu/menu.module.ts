@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Menu } from './entities/menu.entity';
-import { MenuService } from './services/menu.service';
-import { MenuController } from './controllers/menu.controller';
-import { RoleModule } from '../role/role.module';
-import { PermissionModule } from '../permission/permission.module';
-import { AuthModule } from '../auth/auth.module';
+import { Menu } from '@modules/menu/entities/menu.entity';
+import { MenuService } from '@modules/menu/services/menu.service';
+import { MenuController } from '@modules/menu/controllers/menu.controller';
+import { RoleModule } from '@modules/role/role.module';
+import { PermissionModule } from '@modules/permission/permission.module';
+import { AuthModule } from '@modules/auth/auth.module';
 
 @Module({
   imports: [

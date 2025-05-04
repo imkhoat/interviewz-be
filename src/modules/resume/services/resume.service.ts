@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Resume } from '../entities/resume.entity';
-import { ResumeDetail } from '../entities/resume-detail.entity';
-import { ResumeSection } from '../entities/resume-section.entity';
-import { WorkExperience } from '../entities/work-experience.entity';
-import { Education } from '../entities/education.entity';
-import { Skill } from '../entities/skill.entity';
-import { Project } from '../entities/project.entity';
-import { Certification } from '../entities/certification.entity';
-import { CustomSection } from '../entities/custom-section.entity';
-import { CustomItem } from '../entities/custom-item.entity';
-import { ResumeVersion } from '../entities/resume-version.entity';
+import { Resume } from '@modules/resume/entities/resume.entity';
+import { ResumeDetail } from '@modules/resume/entities/resume-detail.entity';
+import { ResumeSection } from '@modules/resume/entities/resume-section.entity';
+import { WorkExperience } from '@modules/resume/entities/work-experience.entity';
+import { Education } from '@modules/resume/entities/education.entity';
+import { Skill } from '@modules/resume/entities/skill.entity';
+import { Project } from '@modules/resume/entities/project.entity';
+import { Certification } from '@modules/resume/entities/certification.entity';
+import { CustomSection } from '@modules/resume/entities/custom-section.entity';
+import { CustomItem } from '@modules/resume/entities/custom-item.entity';
+import { ResumeVersion } from '@modules/resume/entities/resume-version.entity';
 
 @Injectable()
 export class ResumeService {

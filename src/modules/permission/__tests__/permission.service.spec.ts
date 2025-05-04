@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PermissionService } from '../services/permission.service';
+import { PermissionService } from '@modules/permission/services/permission.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Permission } from '../entities/permission.entity';
+import { Permission } from '@modules/permission/entities/permission.entity';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 

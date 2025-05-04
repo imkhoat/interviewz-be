@@ -1,5 +1,5 @@
-import { Repository } from 'typeorm';
-import { User } from '../entities/user.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { EntityRepository, Repository } from 'typeorm';
 
 export class UserRepository extends Repository<User> {
   async findByEmail(email: string): Promise<User | null> {

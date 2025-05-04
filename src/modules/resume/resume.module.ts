@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '@modules/auth/auth.module';
 import { Resume } from './entities/resume.entity';
 import { ResumeDetail } from './entities/resume-detail.entity';
 import { ResumeSection } from './entities/resume-section.entity';

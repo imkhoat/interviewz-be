@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Menu } from '../entities/menu.entity';
-import { User } from '../../user/entities/user.entity';
-import { Role } from '../../role/entities/role.entity';
-import { Permission } from '../../permission/entities/permission.entity';
-import { CreateMenuDto } from '../dto/create-menu.dto';
-import { UpdateMenuDto } from '../dto/update-menu.dto';
+import { Menu } from '@modules/menu/entities/menu.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { Permission } from '@modules/permission/entities/permission.entity';
+import { CreateMenuDto } from '@modules/menu/dto/create-menu.dto';
+import { UpdateMenuDto } from '@modules/menu/dto/update-menu.dto';
 
 @Injectable()
 export class MenuService {

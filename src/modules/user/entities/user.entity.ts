@@ -11,12 +11,8 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import * as argon2 from 'argon2';
-import { Role } from '../../role/entities/role.entity';
-
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
-}
+import { Role } from '@modules/role/entities/role.entity';
+import { UserRole } from '@modules/user/enums/user-role.enum';
 
 @Entity('users')
 export class User {
