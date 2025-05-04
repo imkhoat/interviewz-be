@@ -8,8 +8,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Resume } from './resume.entity';
-import { CustomItem } from './custom-item.entity';
+import { Resume } from '@modules/resume/entities/resume.entity';
+import { CustomItem } from '@modules/resume/entities/custom-item.entity';
 
 @Entity()
 export class CustomSection {

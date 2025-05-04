@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Resume } from './resume.entity';
+import { Resume } from '@modules/resume/entities/resume.entity';
 
 @Entity()
 export class Certification {

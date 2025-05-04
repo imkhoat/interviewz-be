@@ -2,19 +2,19 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from '@modules/auth/auth.module';
-import { Resume } from './entities/resume.entity';
-import { ResumeDetail } from './entities/resume-detail.entity';
-import { ResumeSection } from './entities/resume-section.entity';
-import { WorkExperience } from './entities/work-experience.entity';
-import { Education } from './entities/education.entity';
-import { Skill } from './entities/skill.entity';
-import { Project } from './entities/project.entity';
-import { Certification } from './entities/certification.entity';
-import { CustomSection } from './entities/custom-section.entity';
-import { CustomItem } from './entities/custom-item.entity';
-import { ResumeVersion } from './entities/resume-version.entity';
-import { ResumeService } from './services/resume.service';
-import { ResumeController } from './controllers/resume.controller';
+import { Resume } from '@modules/resume/entities/resume.entity';
+import { ResumeDetail } from '@modules/resume/entities/resume-detail.entity';
+import { ResumeSection } from '@modules/resume/entities/resume-section.entity';
+import { WorkExperience } from '@modules/resume/entities/work-experience.entity';
+import { Education } from '@modules/resume/entities/education.entity';
+import { Skill } from '@modules/resume/entities/skill.entity';
+import { Project } from '@modules/resume/entities/project.entity';
+import { Certification } from '@modules/resume/entities/certification.entity';
+import { CustomSection } from '@modules/resume/entities/custom-section.entity';
+import { CustomItem } from '@modules/resume/entities/custom-item.entity';
+import { ResumeVersion } from '@modules/resume/entities/resume-version.entity';
+import { ResumeService } from '@modules/resume/services/resume.service';
+import { ResumeController } from '@modules/resume/controllers/resume.controller';
 
 @Module({
   imports: [
