@@ -23,4 +23,4 @@ export const swaggerConfig = new DocumentBuilder()
   .addTag('policies', 'Policy management endpoints')
   .addTag('resources', 'Resource management endpoints')
   .addTag('resumes', 'Resume management endpoints')
-  .build(); 
+  .build();
