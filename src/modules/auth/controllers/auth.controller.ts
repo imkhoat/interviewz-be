@@ -1,13 +1,13 @@
-import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './auth.guard';
-import { RefreshTokenGuard } from './refresh.guard';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { LoginResponseDto } from './dto/login-response.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { GetUser } from './decorators/get-user.decorator';
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { AuthService } from '../services/auth.service';
+import { JwtAuthGuard } from '../guards/auth.guard';
+import { RefreshTokenGuard } from '../guards/refresh.guard';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { ChangePasswordDto } from '../dto/change-password.dto';
+import { GetUser } from '../decorators/get-user.decorator';
+import { LoginResponseDto } from '../dto/login-response.dto';
+import { CreateUserDto } from '../..//user/dto/create-user.dto';
 
 @Controller('auth')
 // @UseGuards(JwtAuthGuard, RoleGuard)

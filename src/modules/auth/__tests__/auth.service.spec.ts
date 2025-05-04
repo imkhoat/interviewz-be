@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { UserRole } from '../../user/enums/user-role.enum';
+import { UserRole } from '../../user/user.entity';
 import {
   BadRequestException,
   NotFoundException,

@@ -7,14 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
+  Req,
 } from '@nestjs/common';
 import { MenuService } from '../services/menu.service';
 import { CreateMenuDto } from '../dto/create-menu.dto';
 import { UpdateMenuDto } from '../dto/update-menu.dto';
-import { JwtAuthGuard } from '../../auth/auth.guard';
-import { RoleGuard } from '../../auth/role.guard';
-import { Roles } from '../../auth/role.decorator';
+import { JwtAuthGuard } from '../../auth/guards/auth.guard';
+import { RoleGuard } from '../../auth/guards/role.guard';
+import { Roles } from '../../auth/decorators/role.decorator';
 import { UserRole } from '../../user/user.entity';
 
 @Controller('menus')
@@ -35,7 +35,7 @@ export class MenuController {
   }
 
   @Get('user')
-  findUserMenus(@Request() req: { user: { id: number } }) {
+  findUserMenus(@Req() req: { user: { id: number } }) {
     return this.menuService.findUserMenus(req.user.id);
   }
 
