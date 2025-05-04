@@ -1,4 +1,4 @@
-import { UserRole } from '../../user/user.entity';
+import { UserRole } from '../../user/entities/user.entity';
 
 export class LoginResponseDto {
   user: {

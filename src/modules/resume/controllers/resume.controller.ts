@@ -10,10 +10,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ResumeService } from '../services/resume.service';
-import { JwtAuthGuard } from '../../auth/auth.guard';
-import { RoleGuard } from '../../auth/role.guard';
-import { Roles } from '../../auth/role.decorator';
-import { UserRole } from '../../user/enums/user-role.enum';
+import { JwtAuthGuard } from '../../auth/guards/auth.guard';
+import { RoleGuard } from '../../auth/guards/role.guard';
+import { Roles } from '../../auth/decorators/role.decorator';
+import { UserRole } from '../../user/entities/user.entity';
 import { RequestWithUser } from '../../auth/interfaces/request.interface';
 import { Resume } from '../entities/resume.entity';
 import { ResumeDetail } from '../entities/resume-detail.entity';

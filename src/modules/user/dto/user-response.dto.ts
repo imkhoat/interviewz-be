@@ -1,4 +1,4 @@
-import { UserRole } from '../user.entity';
+import { UserRole } from '../entities/user.entity';
 
 export class UserResponseDto {
   id: number;

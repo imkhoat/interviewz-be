@@ -8,15 +8,15 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
-import { User } from '../user/user.entity';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { User } from '../../user/entities/user.entity';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { LoginResponseDto } from './dto/login-response.dto';
+import { CreateUserDto } from '../../user/dto/create-user.dto';
+import { LoginResponseDto } from '../dto/login-response.dto';
 import * as crypto from 'crypto';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import { ChangePasswordDto } from '../dto/change-password.dto';
 import * as argon2 from 'argon2';
 
 @Injectable()
