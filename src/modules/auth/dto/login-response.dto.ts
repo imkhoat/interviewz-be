@@ -1,4 +1,4 @@
-import { UserRole } from '../../user/entities/user.entity';
+import { UserRole } from '@modules/user/enums/user-role.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginResponseDto {

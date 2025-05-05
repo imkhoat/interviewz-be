@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from '../auth.service';
+import { AuthService } from '@modules/auth/services/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../../user/entities/user.entity';
+import { User } from '@modules/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { UserRole } from '../../user/entities/user.entity';
+import { UserRole } from '@modules/user/enums/user-role.enum';
 import {
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateUserDto } from '../../user/dto/create-user.dto';
+import { CreateUserDto } from '@modules/user/dto/create-user.dto';
 import * as argon2 from 'argon2';
 
 jest.mock('argon2', () => ({

@@ -9,23 +9,29 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ResumeService } from '../services/resume.service';
-import { JwtAuthGuard } from '../../auth/guards/auth.guard';
-import { RoleGuard } from '../../auth/guards/role.guard';
-import { Roles } from '../../auth/decorators/role.decorator';
-import { UserRole } from '../../user/entities/user.entity';
-import { RequestWithUser } from '../../auth/interfaces/request.interface';
-import { Resume } from '../entities/resume.entity';
-import { ResumeDetail } from '../entities/resume-detail.entity';
-import { ResumeSection } from '../entities/resume-section.entity';
-import { WorkExperience } from '../entities/work-experience.entity';
-import { Education } from '../entities/education.entity';
-import { Skill } from '../entities/skill.entity';
-import { Project } from '../entities/project.entity';
-import { Certification } from '../entities/certification.entity';
-import { CustomSection } from '../entities/custom-section.entity';
-import { CustomItem } from '../entities/custom-item.entity';
-import { ResumeVersion } from '../entities/resume-version.entity';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { ResumeService } from '@modules/resume/services/resume.service';
+import { JwtAuthGuard } from '@modules/auth/guards/auth.guard';
+import { RoleGuard } from '@modules/auth/guards/role.guard';
+import { Roles } from '@modules/auth/decorators/role.decorator';
+import { UserRole } from '@modules/user/enums/user-role.enum';
+import { RequestWithUser } from '@modules/auth/interfaces/request.interface';
+import { Resume } from '@modules/resume/entities/resume.entity';
+import { ResumeDetail } from '@modules/resume/entities/resume-detail.entity';
+import { ResumeSection } from '@modules/resume/entities/resume-section.entity';
+import { WorkExperience } from '@modules/resume/entities/work-experience.entity';
+import { Education } from '@modules/resume/entities/education.entity';
+import { Skill } from '@modules/resume/entities/skill.entity';
+import { Project } from '@modules/resume/entities/project.entity';
+import { Certification } from '@modules/resume/entities/certification.entity';
+import { CustomSection } from '@modules/resume/entities/custom-section.entity';
+import { CustomItem } from '@modules/resume/entities/custom-item.entity';
+import { ResumeVersion } from '@modules/resume/entities/resume-version.entity';
 
 @Controller('resumes')
 @UseGuards(JwtAuthGuard, RoleGuard)

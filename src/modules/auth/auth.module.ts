@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthService } from './services/auth.service';
-import { AuthController } from './controllers/auth.controller';
-import { JwtStrategy } from './strategies/auth.strategy';
-import { User } from '../user/entities/user.entity';
-import { MailerModule } from '@nestjs-modules/mailer';
+import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { AuthService } from '@modules/auth/services/auth.service';
+import { AuthController } from '@modules/auth/controllers/auth.controller';
+import { JwtStrategy } from '@modules/auth/strategies/auth.strategy';
+import { User } from '@modules/user/entities/user.entity';
+import { PassportModule } from '@nestjs/passport';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 

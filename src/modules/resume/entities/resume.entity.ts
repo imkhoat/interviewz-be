@@ -8,15 +8,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ResumeDetail } from './resume-detail.entity';
-import { ResumeSection } from './resume-section.entity';
-import { WorkExperience } from './work-experience.entity';
-import { Education } from './education.entity';
-import { Skill } from './skill.entity';
-import { Project } from './project.entity';
-import { Certification } from './certification.entity';
-import { CustomSection } from './custom-section.entity';
-import { ResumeVersion } from './resume-version.entity';
+import { ResumeDetail } from '@modules/resume/entities/resume-detail.entity';
+import { ResumeSection } from '@modules/resume/entities/resume-section.entity';
+import { WorkExperience } from '@modules/resume/entities/work-experience.entity';
+import { Education } from '@modules/resume/entities/education.entity';
+import { Skill } from '@modules/resume/entities/skill.entity';
+import { Project } from '@modules/resume/entities/project.entity';
+import { Certification } from '@modules/resume/entities/certification.entity';
+import { CustomSection } from '@modules/resume/entities/custom-section.entity';
+import { ResumeVersion } from '@modules/resume/entities/resume-version.entity';
 
 @Entity()
 export class Resume {

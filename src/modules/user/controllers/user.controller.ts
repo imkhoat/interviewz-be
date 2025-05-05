@@ -5,11 +5,11 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
-import { UserService } from '../services/user.service';
-import { JwtAuthGuard } from '../../auth/guards/auth.guard';
-import { RoleGuard } from '../../auth/guards/role.guard';
-import { Roles } from '../../auth/decorators/role.decorator';
-import { UserRole } from '../enums/user-role.enum';
+import { UserService } from '@modules/user/services/user.service';
+import { JwtAuthGuard } from '@modules/auth/guards/auth.guard';
+import { RoleGuard } from '@modules/auth/guards/role.guard';
+import { Roles } from '@modules/auth/decorators/role.decorator';
+import { UserRole } from '@modules/user/enums/user-role.enum';
 import {
   ApiTags,
   ApiOperation,

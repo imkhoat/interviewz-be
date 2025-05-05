@@ -1,4 +1,4 @@
-import { UserRole } from '../entities/user.entity';
+import { UserRole } from '@modules/user/enums/user-role.enum';
 
 export class UserResponseDto {
   id: number;

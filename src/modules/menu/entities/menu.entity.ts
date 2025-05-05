@@ -6,9 +6,12 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { Role } from '../../role/entities/role.entity';
-import { Permission } from '../../permission/entities/permission.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { Permission } from '@modules/permission/entities/permission.entity';
 
 @Entity('menus')
 export class Menu {

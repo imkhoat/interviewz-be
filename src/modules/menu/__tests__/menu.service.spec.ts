@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MenuService } from '../services/menu.service';
+import { MenuService } from '@modules/menu/services/menu.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Menu } from '../entities/menu.entity';
-import { Role } from '../../role/entities/role.entity';
-import { Permission } from '../../permission/entities/permission.entity';
-import { User } from '../../user/entities/user.entity';
+import { Menu } from '@modules/menu/entities/menu.entity';
+import { Role } from '@modules/role/entities/role.entity';
+import { Permission } from '@modules/permission/entities/permission.entity';
+import { User } from '@modules/user/entities/user.entity';
 import { NotFoundException } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 

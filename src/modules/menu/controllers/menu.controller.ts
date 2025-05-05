@@ -9,13 +9,19 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { MenuService } from '../services/menu.service';
-import { CreateMenuDto } from '../dto/create-menu.dto';
-import { UpdateMenuDto } from '../dto/update-menu.dto';
-import { JwtAuthGuard } from '../../auth/guards/auth.guard';
-import { RoleGuard } from '../../auth/guards/role.guard';
-import { Roles } from '../../auth/decorators/role.decorator';
-import { UserRole } from '../../user/entities/user.entity';
+import { MenuService } from '@modules/menu/services/menu.service';
+import { CreateMenuDto } from '@modules/menu/dto/create-menu.dto';
+import { UpdateMenuDto } from '@modules/menu/dto/update-menu.dto';
+import { JwtAuthGuard } from '@modules/auth/guards/auth.guard';
+import { RoleGuard } from '@modules/auth/guards/role.guard';
+import { Roles } from '@modules/auth/decorators/role.decorator';
+import { UserRole } from '@modules/user/enums/user-role.enum';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @Controller('menus')
 @UseGuards(JwtAuthGuard, RoleGuard)

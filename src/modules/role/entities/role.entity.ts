@@ -5,11 +5,13 @@ import {
   ManyToMany,
   JoinTable,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { Permission } from '../../permission/entities/permission.entity';
-import { Menu } from '../../menu/entities/menu.entity';
-import { Policy } from '../../policy/entities/policy.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { Permission } from '@modules/permission/entities/permission.entity';
+import { Menu } from '@modules/menu/entities/menu.entity';
+import { Policy } from '@modules/policy/entities/policy.entity';
 
 @Entity('roles')
 export class Role {

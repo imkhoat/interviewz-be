@@ -1,13 +1,13 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
-import { AuthService } from '../services/auth.service';
-import { JwtAuthGuard } from '../guards/auth.guard';
-import { RefreshTokenGuard } from '../guards/refresh.guard';
-import { ForgotPasswordDto } from '../dto/forgot-password.dto';
-import { ResetPasswordDto } from '../dto/reset-password.dto';
-import { ChangePasswordDto } from '../dto/change-password.dto';
-import { GetUser } from '../decorators/get-user.decorator';
-import { LoginResponseDto } from '../dto/login-response.dto';
-import { CreateUserDto } from '../..//user/dto/create-user.dto';
+import { AuthService } from '@modules/auth/services/auth.service';
+import { JwtAuthGuard } from '@modules/auth/guards/auth.guard';
+import { RefreshTokenGuard } from '@modules/auth/guards/refresh.guard';
+import { ForgotPasswordDto } from '@modules/auth/dto/forgot-password.dto';
+import { ResetPasswordDto } from '@modules/auth/dto/reset-password.dto';
+import { ChangePasswordDto } from '@modules/auth/dto/change-password.dto';
+import { GetUser } from '@modules/auth/decorators/get-user.decorator';
+import { LoginResponseDto } from '@modules/auth/dto/login-response.dto';
+import { CreateUserDto } from '@modules/user/dto/create-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('auth')
@@ -48,7 +48,9 @@ export class AuthController {
     type: LoginResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refresh(@Req() req: { user: { id: number; refreshToken: string } }): Promise<LoginResponseDto> {
+  async refresh(
+    @Req() req: { user: { id: number; refreshToken: string } },
+  ): Promise<LoginResponseDto> {
     return this.authService.refreshToken(req.user.id, req.user.refreshToken);
   }
 
@@ -57,7 +59,9 @@ export class AuthController {
   @ApiOperation({ summary: 'User logout' })
   @ApiResponse({ status: 200, description: 'Logout successful' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async logout(@Req() req: { user: { id: number } }): Promise<{ message: string }> {
+  async logout(
+    @Req() req: { user: { id: number } },
+  ): Promise<{ message: string }> {
     return this.authService.logout(req.user.id);
   }
 
@@ -75,7 +79,9 @@ export class AuthController {
   @ApiBody({ type: ForgotPasswordDto })
   @ApiResponse({ status: 200, description: 'Password reset email sent' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
     return this.authService.forgotPassword(forgotPasswordDto);
   }
 
@@ -84,7 +90,9 @@ export class AuthController {
   @ApiBody({ type: ResetPasswordDto })
   @ApiResponse({ status: 200, description: 'Password reset successful' })
   @ApiResponse({ status: 400, description: 'Invalid token' })
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
     return this.authService.resetPassword(resetPasswordDto);
   }
 

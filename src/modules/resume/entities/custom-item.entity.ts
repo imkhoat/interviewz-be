@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CustomSection } from './custom-section.entity';
+import { CustomSection } from '@modules/resume/entities/custom-section.entity';
 
 @Entity()
 export class CustomItem {
