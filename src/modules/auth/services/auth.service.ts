@@ -3,7 +3,6 @@ import {
   UnauthorizedException,
   BadRequestException,
   NotFoundException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -79,7 +78,6 @@ export class AuthService {
 
     // Create new user - password will be hashed by entity hooks
     const user = this.userRepository.create(payload);
-    await user.hashPassword();
     await this.userRepository.save(user);
 
     // Generate tokens
@@ -174,9 +172,8 @@ export class AuthService {
         throw new UnauthorizedException('Current password is incorrect');
       }
 
-      const hashedPassword = await argon2.hash(changePasswordDto.newPassword);
-      user.password = hashedPassword;
-      await user.hashPassword();
+      // Set new password directly - it will be hashed by the @BeforeUpdate hook
+      user.password = changePasswordDto.newPassword;
       await this.userRepository.save(user);
     } catch (error) {
       throw new UnauthorizedException('Error changing password');

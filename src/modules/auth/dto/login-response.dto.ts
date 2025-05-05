@@ -10,7 +10,11 @@ export class LoginResponseDto {
       firstName: { type: 'string', example: 'John', required: false },
       lastName: { type: 'string', example: 'Doe', required: false },
       fullName: { type: 'string', example: 'John Doe' },
-      userRole: { type: 'string', enum: Object.values(UserRole), example: UserRole.USER },
+      userRole: {
+        type: 'string',
+        enum: Object.values(UserRole),
+        example: UserRole.USER,
+      },
       isActive: { type: 'boolean', example: true },
       createdAt: { type: 'string', format: 'date-time' },
       updatedAt: { type: 'string', format: 'date-time' },
@@ -31,8 +35,14 @@ export class LoginResponseDto {
   @ApiProperty({
     type: 'object',
     properties: {
-      accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-      refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+      accessToken: {
+        type: 'string',
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      },
+      refreshToken: {
+        type: 'string',
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+      },
     },
   })
   tokens: {

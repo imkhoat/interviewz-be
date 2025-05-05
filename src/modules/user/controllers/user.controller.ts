@@ -10,7 +10,13 @@ import { JwtAuthGuard } from '../../auth/guards/auth.guard';
 import { RoleGuard } from '../../auth/guards/role.guard';
 import { Roles } from '../../auth/decorators/role.decorator';
 import { UserRole } from '../enums/user-role.enum';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @ApiTags('users')
 @ApiBearerAuth()

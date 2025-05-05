@@ -27,7 +27,11 @@ export class AuthController {
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    type: LoginResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
     @Body() body: { email: string; password: string },
@@ -38,9 +42,13 @@ export class AuthController {
   @Post('refresh')
   @UseGuards(RefreshTokenGuard)
   @ApiOperation({ summary: 'Refresh access token' })
-  @ApiResponse({ status: 200, description: 'Token refreshed successfully', type: LoginResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    type: LoginResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refresh(@Req() req): Promise<LoginResponseDto> {
+  async refresh(@Req() req: { user: { id: number; refreshToken: string } }): Promise<LoginResponseDto> {
     return this.authService.refreshToken(req.user.id, req.user.refreshToken);
   }
 
@@ -49,7 +57,7 @@ export class AuthController {
   @ApiOperation({ summary: 'User logout' })
   @ApiResponse({ status: 200, description: 'Logout successful' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async logout(@Req() req) {
+  async logout(@Req() req: { user: { id: number } }): Promise<{ message: string }> {
     return this.authService.logout(req.user.id);
   }
 
@@ -58,7 +66,7 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'User created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
-  async signup(@Body() body: CreateUserDto) {
+  async signup(@Body() body: CreateUserDto): Promise<{ message: string }> {
     return this.authService.signup(body);
   }
 
@@ -67,7 +75,7 @@ export class AuthController {
   @ApiBody({ type: ForgotPasswordDto })
   @ApiResponse({ status: 200, description: 'Password reset email sent' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
     return this.authService.forgotPassword(forgotPasswordDto);
   }
 
@@ -76,7 +84,7 @@ export class AuthController {
   @ApiBody({ type: ResetPasswordDto })
   @ApiResponse({ status: 200, description: 'Password reset successful' })
   @ApiResponse({ status: 400, description: 'Invalid token' })
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
     return this.authService.resetPassword(resetPasswordDto);
   }
 
@@ -88,7 +96,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 400, description: 'Invalid current password' })
   async changePassword(
-    @GetUser('id') userId: number,
+    @GetUser('sub') userId: number,
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<{ message: string }> {
     await this.authService.changePassword(userId, changePasswordDto);
