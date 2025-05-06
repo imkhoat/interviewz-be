@@ -32,19 +32,22 @@ import { Certification } from '@modules/resume/entities/certification.entity';
 import { CustomSection } from '@modules/resume/entities/custom-section.entity';
 import { CustomItem } from '@modules/resume/entities/custom-item.entity';
 import { ResumeVersion } from '@modules/resume/entities/resume-version.entity';
+import { CreateResumeDto } from '@modules/resume/dto/create-resume.dto';
 
 @Controller('resumes')
 @UseGuards(JwtAuthGuard, RoleGuard)
-@Roles(UserRole.USER)
+@Roles(UserRole.CANDIDATE)
 export class ResumeController {
   constructor(private readonly resumeService: ResumeService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create a new resume' })
+  @ApiResponse({ status: 201, description: 'Resume created successfully' })
   async createResume(
     @Req() req: RequestWithUser,
-    @Body() data: Partial<Resume>,
+    @Body() createResumeDto: CreateResumeDto,
   ): Promise<Resume> {
-    return this.resumeService.createResume(req.user.id, data);
+    return this.resumeService.createResume(req.user.id, createResumeDto);
   }
 
   @Get()

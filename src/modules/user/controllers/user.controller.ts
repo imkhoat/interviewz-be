@@ -17,6 +17,7 @@ import {
   ApiParam,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { User } from '@modules/user/entities/user.entity';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -44,11 +45,10 @@ export class UserController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Get all users (admin only)' })
-  @ApiResponse({ status: 200, description: 'List of users' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  async getUsers() {
+  @Roles(UserRole.INTERVIEWER)
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({ status: 200, description: 'Return all users' })
+  async findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 }
