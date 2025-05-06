@@ -70,8 +70,8 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'User created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
-  async signup(@Body() body: CreateUserDto): Promise<{ message: string }> {
-    return this.authService.signup(body);
+  async signup(@Body() body: CreateUserDto): Promise<LoginResponseDto> {
+    return await this.authService.signup(body);
   }
 
   @Post('forgot-password')
