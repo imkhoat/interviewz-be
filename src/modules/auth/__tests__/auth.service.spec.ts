@@ -49,7 +49,7 @@ describe('AuthService', () => {
     password: 'hashedPassword',
     firstName: 'John',
     lastName: 'Doe',
-    userRole: UserRole.USER,
+    userRole: UserRole.CANDIDATE,
     isActive: true,
     refreshToken: undefined,
     resetPasswordToken: undefined,

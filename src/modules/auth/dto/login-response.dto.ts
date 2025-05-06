@@ -13,7 +13,7 @@ export class LoginResponseDto {
       userRole: {
         type: 'string',
         enum: Object.values(UserRole),
-        example: UserRole.USER,
+        example: UserRole.CANDIDATE,
       },
       isActive: { type: 'boolean', example: true },
       createdAt: { type: 'string', format: 'date-time' },
