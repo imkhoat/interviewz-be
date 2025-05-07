@@ -39,6 +39,10 @@ export class AuthService {
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
       }
+
+      if (!user.isEmailVerified) {
+        throw new UnauthorizedException('Please verify your email first');
+      }
     } catch (error) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -64,7 +68,7 @@ export class AuthService {
     };
   }
 
-  async signup(payload: CreateUserDto) {
+  async signup(payload: CreateUserDto): Promise<{ message: string }> {
     const { email } = payload;
 
     // Check if user already exists
@@ -80,26 +84,87 @@ export class AuthService {
     const user = this.userRepository.create(payload);
     await this.userRepository.save(user);
 
-    // Generate tokens
-    const tokens = await this.generateTokens(user);
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 24); // Token expires in 24 hours
+
     await this.userRepository.update(user.id, {
-      refreshToken: tokens.refreshToken,
+      emailVerificationToken: verificationToken,
+      emailVerificationTokenExpires: expires,
     });
 
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: user.fullName,
-        userRole: user.userRole,
-        isActive: user.isActive,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+    // Send verification email
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const verificationUrl = `${frontendUrl}/auth/verify-email?token=${verificationToken}`;
+
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Verify Your Email',
+      template: 'verify-email',
+      context: {
+        name: user.fullName || user.email,
+        verificationLink: verificationUrl,
       },
-      tokens,
-    };
+    });
+
+    return { message: 'Registration successful. Please check your email to verify your account.' };
+  }
+
+  async verifyEmail(token: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        emailVerificationToken: token,
+        emailVerificationTokenExpires: MoreThan(new Date()),
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired verification token');
+    }
+
+    await this.userRepository.update(user.id, {
+      isEmailVerified: true,
+      emailVerificationToken: '',
+      emailVerificationTokenExpires: new Date(),
+    });
+
+    return { message: 'Email verified successfully' };
+  }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Email is already verified');
+    }
+
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 24);
+
+    await this.userRepository.update(user.id, {
+      emailVerificationToken: verificationToken,
+      emailVerificationTokenExpires: expires,
+    });
+
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+    const verificationUrl = `${frontendUrl}/auth/verify-email?token=${verificationToken}`;
+
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Verify Your Email',
+      template: 'verify-email',
+      context: {
+        fullName: user.fullName || 'there',
+        verificationUrl,
+      },
+    });
+
+    return { message: 'Verification email has been resent' };
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {

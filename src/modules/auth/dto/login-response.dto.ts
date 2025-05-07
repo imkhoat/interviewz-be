@@ -1,5 +1,7 @@
 import { UserRole } from '@modules/user/enums/user-role.enum';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserResponseDto } from '@modules/user/dto/user-response.dto';
+import { TokensDto } from '@modules/auth/dto/tokens.dto';
 
 export class LoginResponseDto {
   @ApiProperty({
@@ -20,17 +22,7 @@ export class LoginResponseDto {
       updatedAt: { type: 'string', format: 'date-time' },
     },
   })
-  user: {
-    id: number;
-    email: string;
-    firstName?: string;
-    lastName?: string;
-    fullName: string;
-    userRole: UserRole;
-    isActive: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-  };
+  user: UserResponseDto;
 
   @ApiProperty({
     type: 'object',
@@ -45,8 +37,8 @@ export class LoginResponseDto {
       },
     },
   })
-  tokens: {
-    accessToken: string;
-    refreshToken: string;
-  };
+  tokens: TokensDto;
+
+  @ApiProperty({ required: false })
+  message?: string;
 }

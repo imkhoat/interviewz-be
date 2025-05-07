@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Reset Your Password</title>
+    <title>Verify Your Email</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,22 +44,22 @@
 </head>
 <body>
     <div class="header">
-        <h1>Reset Your Password</h1>
+        <h1>Welcome to Interviewz!</h1>
     </div>
     <div class="content">
         <p>Hello {{name}},</p>
-        <p>We received a request to reset your password for your Interviewz account. To proceed with the password reset, please click the button below:</p>
+        <p>Thank you for registering with Interviewz. To complete your registration and start using our platform, please verify your email address by clicking the button below:</p>
         
         <div style="text-align: center;">
-            <a href="{{resetLink}}" class="button">Reset Password</a>
+            <a href="{{verificationLink}}" class="button">Verify Email Address</a>
         </div>
 
         <p>If the button above doesn't work, you can also copy and paste the following link into your browser:</p>
-        <p style="word-break: break-all;">{{resetLink}}</p>
+        <p style="word-break: break-all;">{{verificationLink}}</p>
 
-        <p>This password reset link will expire in 1 hour.</p>
+        <p>This verification link will expire in 24 hours.</p>
 
-        <p>If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+        <p>If you didn't create an account with Interviewz, you can safely ignore this email.</p>
     </div>
     <div class="footer">
         <p>This is an automated message, please do not reply to this email.</p>
