@@ -9,6 +9,7 @@ import { GetUser } from '@modules/auth/decorators/get-user.decorator';
 import { LoginResponseDto } from '@modules/auth/dto/login-response.dto';
 import { CreateUserDto } from '@modules/user/dto/create-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { SignupResponseDto } from '@modules/auth/dto/signup-response.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -70,7 +71,7 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'User created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
-  async signup(@Body() body: CreateUserDto): Promise<LoginResponseDto> {
+  async signup(@Body() body: CreateUserDto): Promise<SignupResponseDto> {
     return await this.authService.signup(body);
   }
 
