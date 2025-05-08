@@ -1,4 +1,11 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Req,
+} from '@nestjs/common';
 import { AuthService } from '@modules/auth/services/auth.service';
 import { JwtAuthGuard } from '@modules/auth/guards/auth.guard';
 import { RefreshTokenGuard } from '@modules/auth/guards/refresh.guard';
@@ -10,6 +17,9 @@ import { LoginResponseDto } from '@modules/auth/dto/login-response.dto';
 import { CreateUserDto } from '@modules/user/dto/create-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { SignupResponseDto } from '@modules/auth/dto/signup-response.dto';
+import { RoleGuard } from '@modules/auth/guards/role.guard';
+import { Roles } from '@modules/auth/decorators/role.decorator';
+import { UserRole } from '@modules/user/enums/user-role.enum';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -75,6 +85,56 @@ export class AuthController {
     return await this.authService.signup(body);
   }
 
+  @Post('verify-email')
+  @ApiOperation({ summary: 'Verify user email' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        token: {
+          type: 'string',
+          example: 'verification-token-here',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Email verified successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Email verified successfully',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid or expired verification token' })
+  async verifyEmail(@Body('token') token: string) {
+    return this.authService.verifyEmail(token);
+  }
+
+  @Post('resend-verification')
+  @ApiOperation({ summary: 'Resend verification email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Verification email resent successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Verification email has been resent',
+        },
+      },
+    },
+  })
+  async resendVerificationEmail(@Body('email') email: string) {
+    return this.authService.resendVerificationEmail(email);
+  }
+
   @Post('forgot-password')
   @ApiOperation({ summary: 'Request password reset' })
   @ApiBody({ type: ForgotPasswordDto })
@@ -110,5 +170,17 @@ export class AuthController {
   ): Promise<{ message: string }> {
     await this.authService.changePassword(userId, changePasswordDto);
     return { message: 'Password changed successfully' };
+  }
+
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(UserRole.CANDIDATE)
+  @Get('admin-only')
+  @ApiOperation({ summary: 'Admin only endpoint' })
+  @ApiResponse({
+    status: 200,
+    description: 'Admin access granted',
+  })
+  adminOnly() {
+    return { message: 'This is an admin-only endpoint' };
   }
 }
