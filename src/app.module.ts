@@ -10,6 +10,7 @@ import { RoleModule } from '@modules/role/role.module';
 import { PermissionModule } from '@modules/permission/permission.module';
 import { MenuModule } from '@modules/menu/menu.module';
 import { PolicyModule } from '@modules/policy/policy.module';
+import { OpenAIModule } from '@modules/openai/openai.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PolicyModule } from '@modules/policy/policy.module';
     PermissionModule,
     MenuModule,
     PolicyModule,
+    OpenAIModule,
   ],
   controllers: [AppController],
   providers: [AppService],
