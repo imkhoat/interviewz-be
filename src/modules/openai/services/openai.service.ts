@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { ChatCompletionDto, MessageDto } from '@modules/openai/dto/chat-completion.dto';
+import {
+  ChatCompletionDto,
+  MessageDto,
+} from '@modules/openai/dto/chat-completion.dto';
 
 @Injectable()
 export class OpenAIService {
@@ -52,4 +55,4 @@ export class OpenAIService {
       content,
     };
   }
-} 
+}

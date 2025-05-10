@@ -2,7 +2,12 @@ import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { OpenAIService } from '@modules/openai/services/openai.service';
 import { ChatCompletionDto } from '@modules/openai/dto/chat-completion.dto';
 import { JwtAuthGuard } from '@modules/auth/guards/auth.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @ApiTags('openai')
 @Controller('openai')
@@ -32,4 +37,4 @@ export class OpenAIController {
   async createChatCompletion(@Body() chatCompletionDto: ChatCompletionDto) {
     return this.openAIService.createChatCompletion(chatCompletionDto);
   }
-} 
+}

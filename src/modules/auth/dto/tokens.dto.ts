@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class TokensDto {
-  @ApiProperty()
+  @ApiProperty({ description: 'JWT access token for authentication' })
   accessToken: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'JWT refresh token for getting new access tokens' })
   refreshToken: string;
-} 
+}

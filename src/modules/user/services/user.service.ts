@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '@modules/user/entities/user.entity';
@@ -8,6 +12,7 @@ import { UserResponseDto } from '@modules/user/dto/user-response.dto';
 import { UpdateUserDto } from '@modules/user/dto/update-user.dto';
 import { UserRole } from '@modules/user/enums/user-role.enum';
 import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -25,7 +30,7 @@ export class UserService {
       throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await bcrypt.hash(createUserDto.password ?? '', 10);
     const user = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
@@ -49,6 +54,18 @@ export class UserService {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { email } });
+  }
+
+  async findById(id: number): Promise<User | null> {
+    return this.userRepository.findOne({ where: { id } });
+  }
+
+  async findByProviderId(
+    provider: string,
+    providerId: string,
+  ): Promise<User | null> {
+    const field = `${provider.toLowerCase()}Id`;
+    return this.userRepository.findOne({ where: { [field]: providerId } });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
@@ -103,10 +120,6 @@ export class UserService {
     };
   }
 
-  async findById(id: number): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id } });
-  }
-
   async updateRefreshToken(userId: number, refreshToken: string | null) {
     await this.userRepository.update(userId, {
       refreshToken: refreshToken ?? undefined,
@@ -115,5 +128,9 @@ export class UserService {
 
   async updatePassword(userId: number, hashedPassword: string): Promise<void> {
     await this.userRepository.update(userId, { password: hashedPassword });
+  }
+
+  async validatePassword(user: User, password: string): Promise<boolean> {
+    return argon2.verify(user.password, password);
   }
 }

@@ -17,15 +17,18 @@ import { LoginResponseDto } from '@modules/auth/dto/login-response.dto';
 import * as crypto from 'crypto';
 import { ChangePasswordDto } from '@modules/auth/dto/change-password.dto';
 import * as argon2 from 'argon2';
+import { UserService } from '@modules/user/services/user.service';
+import { OAuthProfile } from '@modules/auth/interfaces/oauth-profile.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
-    private jwtService: JwtService,
-    private mailerService: MailerService,
-    private configService: ConfigService,
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
   ) {}
 
   async login(email: string, password: string): Promise<LoginResponseDto> {
@@ -108,7 +111,10 @@ export class AuthService {
       },
     });
 
-    return { message: 'Registration successful. Please check your email to verify your account.' };
+    return {
+      message:
+        'Registration successful. Please check your email to verify your account.',
+    };
   }
 
   async verifyEmail(token: string) {
@@ -351,5 +357,25 @@ export class AuthService {
   async logout(userId: number) {
     await this.userRepository.update(userId, { refreshToken: '' });
     return { message: 'Logged out successfully' };
+  }
+
+  async handleOAuthLogin(profile: OAuthProfile) {
+    let user = await this.userService.findByProviderId(
+      profile.provider,
+      profile.id,
+    );
+
+    if (!user) {
+      user = await this.userService.create({
+        email: profile.email,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        avatar: profile.avatar,
+        [`${profile.provider}Id`]: profile.id,
+      });
+    }
+
+    const token = this.jwtService.sign({ sub: user.id });
+    return { user, token };
   }
 }

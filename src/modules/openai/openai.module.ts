@@ -22,4 +22,4 @@ import { OpenAIController } from '@modules/openai/controllers/openai.controller'
   providers: [OpenAIService],
   exports: [OpenAIService],
 })
-export class OpenAIModule {} 
+export class OpenAIModule {}
