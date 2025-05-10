@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Menu } from '@modules/menu/entities/menu.entity';
 import { User } from '@modules/user/entities/user.entity';
-import { Role } from '@modules/role/entities/role.entity';
 import { Permission } from '@modules/permission/entities/permission.entity';
 import { CreateMenuDto } from '@modules/menu/dto/create-menu.dto';
 import { UpdateMenuDto } from '@modules/menu/dto/update-menu.dto';
@@ -13,103 +12,76 @@ export class MenuService {
   constructor(
     @InjectRepository(Menu)
     private readonly menuRepository: Repository<Menu>,
-    @InjectRepository(Role)
-    private roleRepository: Repository<Role>,
-    @InjectRepository(Permission)
-    private permissionRepository: Repository<Permission>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async findAll(): Promise<Menu[]> {
     return this.menuRepository.find({
-      relations: ['roles', 'permissions'],
+      order: {
+        order: 'ASC',
+      },
     });
   }
 
   async findOne(id: number): Promise<Menu> {
-    const menu = await this.menuRepository.findOne({
-      where: { id },
-      relations: ['roles', 'permissions'],
-    });
-
+    const menu = await this.menuRepository.findOneBy({ id });
     if (!menu) {
       throw new NotFoundException(`Menu with ID ${id} not found`);
     }
-
     return menu;
   }
 
   async findUserMenus(userId: number): Promise<Menu[]> {
-    // Lấy user với role và permissions
-    const user = await this.menuRepository.manager.findOne(User, {
+    // Get user with roles and permissions
+    const userWithRoles = await this.userRepository.findOne({
       where: { id: userId },
-      relations: [
-        'mainRole',
-        'mainRole.permissions',
-        'additionalRoles',
-        'additionalRoles.permissions',
-      ],
+      relations: ['mainRole', 'mainRole.permissions', 'additionalRoles', 'additionalRoles.permissions'],
     });
 
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+    if (!userWithRoles) {
+      return [];
     }
 
-    // Tạo danh sách tất cả permissions mà user có
-    const userPermissions = new Set<number>();
+    // Create a list of all permissions the user has
+    const userPermissions = new Set<Permission>();
 
-    // Thêm permissions từ role chính
-    if (user.mainRole && user.mainRole.permissions) {
-      user.mainRole.permissions.forEach((permission) => {
-        userPermissions.add(permission.id);
+    // Add permissions from main role
+    if (userWithRoles.mainRole?.permissions) {
+      userWithRoles.mainRole.permissions.forEach((permission) => {
+        userPermissions.add(permission);
       });
     }
 
-    // Thêm permissions từ các role bổ sung
-    if (user.additionalRoles) {
-      user.additionalRoles.forEach((role) => {
+    // Add permissions from additional roles
+    if (userWithRoles.additionalRoles) {
+      userWithRoles.additionalRoles.forEach((role) => {
         if (role.permissions) {
           role.permissions.forEach((permission) => {
-            userPermissions.add(permission.id);
+            userPermissions.add(permission);
           });
         }
       });
     }
 
-    // Lấy tất cả menu mà user có quyền truy cập
-    const menus = await this.menuRepository
-      .createQueryBuilder('menu')
-      .leftJoinAndSelect('menu.permissions', 'permission')
-      .leftJoinAndSelect('menu.roles', 'role')
-      .where(
-        '(permission.id IN (:...permissionIds) OR role.id IN (:...roleIds))',
-        {
-          permissionIds: Array.from(userPermissions),
-          roleIds: [
-            user.mainRole?.id,
-            ...(user.additionalRoles?.map((r) => r.id) || []),
-          ].filter(Boolean),
-        },
-      )
-      .orderBy('menu.order', 'ASC')
-      .getMany();
+    // Get all menus that the user has access to
+    const allMenus = await this.menuRepository.find({
+      relations: ['permissions'],
+      order: {
+        order: 'ASC',
+      },
+    });
 
-    // Lọc menu dựa trên quyền truy cập
-    return this.filterMenusByPermissions(menus, userPermissions);
-  }
-
-  private filterMenusByPermissions(
-    menus: Menu[],
-    userPermissions: Set<number>,
-  ): Menu[] {
-    return menus.filter((menu) => {
-      // Nếu menu không yêu cầu permission nào, cho phép truy cập
+    // Filter menus based on access permissions
+    return allMenus.filter((menu) => {
+      // If menu doesn't require any permissions, allow access
       if (!menu.permissions || menu.permissions.length === 0) {
         return true;
       }
 
-      // Kiểm tra xem user có ít nhất một permission cần thiết không
+      // Check if user has at least one required permission
       return menu.permissions.some((permission) =>
-        userPermissions.has(permission.id),
+        Array.from(userPermissions).some((userPerm) => userPerm.id === permission.id),
       );
     });
   }

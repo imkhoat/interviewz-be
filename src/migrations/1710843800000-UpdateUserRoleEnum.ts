@@ -74,4 +74,4 @@ export class UpdateUserRoleEnum1710843800000 implements MigrationInterface {
       DROP TYPE "users_userrole_enum_old"
     `);
   }
-} 
+}

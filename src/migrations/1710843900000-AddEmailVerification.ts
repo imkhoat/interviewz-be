@@ -18,4 +18,4 @@ export class AddEmailVerification1710843900000 implements MigrationInterface {
       DROP COLUMN "email_verification_token_expires"
     `);
   }
-} 
+}

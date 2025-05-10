@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Get,
-  Req,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
 import { AuthService } from '@modules/auth/services/auth.service';
 import { JwtAuthGuard } from '@modules/auth/guards/auth.guard';
 import { RefreshTokenGuard } from '@modules/auth/guards/refresh.guard';
@@ -20,6 +13,7 @@ import { SignupResponseDto } from '@modules/auth/dto/signup-response.dto';
 import { RoleGuard } from '@modules/auth/guards/role.guard';
 import { Roles } from '@modules/auth/decorators/role.decorator';
 import { UserRole } from '@modules/user/enums/user-role.enum';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -111,7 +105,10 @@ export class AuthController {
       },
     },
   })
-  @ApiResponse({ status: 400, description: 'Invalid or expired verification token' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid or expired verification token',
+  })
   async verifyEmail(@Body('token') token: string) {
     return this.authService.verifyEmail(token);
   }
@@ -182,5 +179,41 @@ export class AuthController {
   })
   adminOnly() {
     return { message: 'This is an admin-only endpoint' };
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {
+    // This route initiates the Google OAuth flow
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthCallback(@Req() req) {
+    return this.authService.handleOAuthLogin(req.user);
+  }
+
+  @Get('linkedin')
+  @UseGuards(AuthGuard('linkedin'))
+  async linkedinAuth() {
+    // This route initiates the LinkedIn OAuth flow
+  }
+
+  @Get('linkedin/callback')
+  @UseGuards(AuthGuard('linkedin'))
+  async linkedinAuthCallback(@Req() req) {
+    return this.authService.handleOAuthLogin(req.user);
+  }
+
+  @Get('facebook')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookAuth() {
+    // This route initiates the Facebook OAuth flow
+  }
+
+  @Get('facebook/callback')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookAuthCallback(@Req() req) {
+    return this.authService.handleOAuthLogin(req.user);
   }
 }

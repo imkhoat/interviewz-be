@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsArray, IsOptional, IsNumber, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsOptional,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class MessageDto {
   @ApiProperty({
@@ -51,4 +58,4 @@ export class ChatCompletionDto {
   @IsNumber()
   @IsOptional()
   max_tokens?: number = 1000;
-} 
+}

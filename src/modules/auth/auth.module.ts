@@ -1,15 +1,19 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module, forwardRef } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { AuthService } from '@modules/auth/services/auth.service';
-import { AuthController } from '@modules/auth/controllers/auth.controller';
-import { JwtStrategy } from '@modules/auth/strategies/auth.strategy';
-import { User } from '@modules/user/entities/user.entity';
-import { PassportModule } from '@nestjs/passport';
-import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
+
+import { AuthController } from '@modules/auth/controllers/auth.controller';
+import { AuthService } from '@modules/auth/services/auth.service';
+import { GoogleStrategy } from '@modules/auth/strategies/google.strategy';
+import { LinkedinStrategy } from '@modules/auth/strategies/linkedin.strategy';
+import { FacebookStrategy } from '@modules/auth/strategies/facebook.strategy';
+import { UserModule } from '@modules/user/user.module';
+import { User } from '@modules/user/entities/user.entity';
 
 @Module({
   imports: [
@@ -46,15 +50,13 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
             strict: true,
           },
         },
-        options: {
-          strict: true,
-        },
       }),
       inject: [ConfigService],
     }),
+    forwardRef(() => UserModule),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, GoogleStrategy, LinkedinStrategy, FacebookStrategy],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
